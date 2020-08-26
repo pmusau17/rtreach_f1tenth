@@ -69,5 +69,30 @@ If you keep the same input for the next 2.000000 s, the state will be:
 ```
 
 ```
+
+
+
+### Using rtreach with the F1Tenth simulator
+
+This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
+
+Once that is installed, create the ros package: 
+
+```
+$ mkdir -p ../rtreach_ros/src
+```
+
+Create the ros-nodes into the package created above:
+
+```
+cp -r ros_src/rtreach/ ../rtreach_ros/src/
+```
+
+Copy the rtreach shared library into the package:
+
+```
+cp src/libRtreach.so ../rtreach_ros/src/rtreach/src/
+```
+
 ### I need to refactor this code...
 

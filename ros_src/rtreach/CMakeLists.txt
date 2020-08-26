@@ -229,5 +229,6 @@ include_directories(
 )
 
 
+FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 add_executable(reach_node src/reach_node.cpp)
-target_link_libraries(reach_node ${catkin_LIBRARIES})
+target_link_libraries(reach_node ${catkin_LIBRARIES} ${CUSTOMLIB})
