@@ -210,6 +210,11 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+add_message_files(
+  FILES
+  velocity_msg.msg
+  angle_msg.msg
+)
 
 generate_messages(
    DEPENDENCIES
@@ -232,3 +237,6 @@ include_directories(
 FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 add_executable(reach_node src/reach_node.cpp)
 target_link_libraries(reach_node ${catkin_LIBRARIES} ${CUSTOMLIB})
+
+add_executable(reach_node_sync src/reach_node_sync.cpp)
+target_link_libraries(reach_node_sync ${catkin_LIBRARIES} ${CUSTOMLIB})
