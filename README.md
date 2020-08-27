@@ -1,6 +1,11 @@
 # F1Tenth Rtreach
 
-### compile the code like this: 
+
+### Real Time Reachability on the F1Tenth Platform 
+
+![Block Diagram](images/rtreach.png)
+
+### Compile the verification code via:  
 
 ```
 gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c  bicycle_main.c bicycle_model.c  -lm -o bicycle -DBICYCLE_MODEL_NONLINEAR
@@ -70,8 +75,6 @@ If you keep the same input for the next 2.000000 s, the state will be:
 
 ```
 
-
-
 ### Using rtreach with the F1Tenth simulator
 
 This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
@@ -95,7 +98,7 @@ cp src/libRtreach.so ../rtreach_ros/src/rtreach/src/
 ```
 
 
-### 
+### Running Rtreach
 
 Start the simulator with the specified track:
 
