@@ -23,12 +23,46 @@ extern "C"
 
 
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr&)
+void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg)
 {
   using std::cout;
   using std::endl;
 
-  cout << "received both messages" << endl;
+  double roll, pitch, yaw, lin_speed;
+  double x,y,u,delta;
+
+  x = msg-> pose.pose.position.x;
+  y = msg-> pose.pose.position.y;
+
+  // define the quaternion matrix
+  tf::Quaternion q(
+        msg->pose.pose.orientation.x,
+        msg->pose.pose.orientation.y,
+        msg->pose.pose.orientation.z,
+        msg->pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+
+  // convert to rpy
+  m.getRPY(roll, pitch, yaw);
+
+  // normalize the speed 
+  tf::Vector3 speed = tf::Vector3(msg->twist.twist.linear.x, msg->twist.twist.linear.x, 0.0);
+  lin_speed = speed.length();
+
+  cout << "x: " << x << endl;
+  cout << "y: " << y << endl;
+  cout << "yaw: " << yaw << endl;
+  cout << "speed: " << lin_speed << endl;
+
+
+  u = velocity_msg->velocity;
+  delta = angle_msg->steering_angle;
+
+  cout << "u: " << u << endl; 
+  cout << "delta: " << delta << endl;
+
+  double state[4] = {x,y,lin_speed,yaw};
+  double control_input[2] = {u,delta};
 }
 
 
