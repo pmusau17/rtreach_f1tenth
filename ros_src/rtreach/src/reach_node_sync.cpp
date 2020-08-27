@@ -7,7 +7,8 @@
 #include <rtreach/angle_msg.h>
 #include <rtreach/velocity_msg.h>
 #include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 // The following class will receive messages from the LEC which will be prediction of the steering angle
 // It will also receive messages from the speed node which will dictate how fast the car should travel
@@ -22,12 +23,12 @@ extern "C"
 
 
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg)
+void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr&)
 {
   using std::cout;
   using std::endl;
 
-  cout << "received both messages";
+  cout << "received both messages" << endl;
 }
 
 
@@ -50,10 +51,21 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
 
 
-    message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 1000);
-    message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 1000);
-    TimeSynchronizer<nav_msgs::Odometry, rtreach::velocity_msg> sync(odom_sub, vel_sub, 10);
-    sync.registerCallback(boost::bind(&callback, _1, _2));
+
+    // a description of how the synchronization works can be found here: 
+    // http://wiki.ros.org/message_filters/ApproximateTime
+    
+    
+    // define the subscribers you want 
+    message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 10);
+    message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 10);
+    message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar/angle_msg", 10);
+
+
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg> MySyncPolicy;
+    // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), odom_sub, vel_sub,angle_sub);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3));
 
 
     ros::spin();

@@ -94,5 +94,16 @@ Copy the rtreach shared library into the package:
 cp src/libRtreach.so ../rtreach_ros/src/rtreach/src/
 ```
 
-### I need to refactor this code...
+
+### 
+
+Start the simulator with the specified track:
+
+```
+roslaunch race rtreach.launch world_name:=track_porto model_name:=minivgg_3.hdf5
+```
+
+You can select a world file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/simulator/racecar-simulator/racecar_gazebo/worlds). You can also select a model file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). 
+
+
 
