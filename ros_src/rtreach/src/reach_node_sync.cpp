@@ -30,6 +30,10 @@ extern "C"
 
 ros::Publisher ackermann_pub; 
 
+// reachability parameters
+const double sim_time = 1.5;
+double ms = 0.0;
+const double walltime = 0.2;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg)
@@ -82,7 +86,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   ack_msg.drive.steering_angle = delta;
   ack_msg.drive.speed = u;
 
-  ackermann_pub.publish(ack_msg);
+  // ackermann_pub.publish(ack_msg);
+  ms =0.0;
+  runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
 }
 
 

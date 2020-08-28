@@ -10,6 +10,10 @@
 // declaration 
 bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
 
+// helper function to check safety
+bool check_safety(HyperRectangle* rect, REAL (*cone)[2]);
+
+
 // function that stops simulation after two seconds
 bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 {
@@ -51,29 +55,55 @@ REAL getSimulatedSafeTime(REAL start[4],REAL heading_input,REAL throttle)
 	return rv;
 }
 
+
+
+// helper function to check safety
+bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
+{
+	
+	REAL l1[2] = {rect->dims[0].min,rect->dims[1].max};
+    REAL r1[2] = {rect->dims[0].max,rect->dims[1].min};
+
+	REAL l2[2] = {cone[0][0],cone[1][1]};
+    REAL r2[2] = {cone[0][1],cone[1][0]};
+	
+	if (l1[0] >= r2[0] || l2[0] >= r1[0]) 
+        return true; 
+    
+    if (l1[1] <= r2[1] || l2[1] <= r1[1]) 
+        return true; 
+	
+	return false;
+}
+
+
+
 // called on states reached during the computation
 bool intermediateState(HyperRectangle* r)
 {
 	bool allowed = true;
 	//const REAL FIFTEEN_DEGREES_IN_RADIANS = 0.2618;
 
-	// check hyper_rectangle enters the set x: [1,2], y: [1,2] for now
+	// Alright for now I'm going to encode the cones in here manually.
+	// This isn't ideal but also it's a first step
 
-    // println(r);
-	if (r->dims[0].min > 1.0 && r->dims[0].max < 2.0) 
+	double cone1[2][2] = {{1,2},{-0.5,0.5}};
+	double cone2[2][2] = {{3,4},{-0.5,0.5}};
+	double cone3[2][2] = {{5,6},{-0.5,0.5}};
+	double cone4[2][2] = {{7,8},{-0.5,0.5}};
+	double cone5[2][2] = {{9,10},{-0.5,0.5}};
+
+	
+    if(check_safety(r,cone1) && check_safety(r,cone2) && check_safety(r,cone3) && check_safety(r,cone4) && check_safety(r,cone5))
 	{
+		allowed = true;
+	}
+	else{
 		allowed = false;
 	}
-	else if (r->dims[1].min > 1.0 && r->dims[1].max < 2.0)
-	{
-		allowed = false;
-	}
-		
 
 	if(!allowed)
 		printf("unsafe..../n");
-	// println(r);
-	// printf("%d, min: %f, min %f\n",allowed,r->dims[0].min,r->dims[0].max);
 	return allowed;
 }
 
