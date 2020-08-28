@@ -37,7 +37,7 @@ bool finalState(HyperRectangle* rect)
 {
 	REAL maxPotential = 0.0;
 
-	DEBUG_PRINT("--->  potential of final state = %f\n", maxPotential);
+	// DEBUG_PRINT("--->  potential of final state = %f\n", maxPotential);
 
 	return maxPotential > 1;
 }
@@ -113,12 +113,12 @@ bool intermediateState(HyperRectangle* r)
 bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
-	printf("Starting reachability computation from the following state:\n");
+	// printf("Starting reachability computation from the following state:\n");
 	for (int d = 0; d < NUM_DIMS; ++d)
 	{
 		set.init.dims[d].min = start[d];
 		set.init.dims[d].max = start[d];
-		printf("[%f,%f]\n",set.init.dims[d].min,set.init.dims[d].max);
+		// printf("[%f,%f]\n",set.init.dims[d].min,set.init.dims[d].max);
 	}
 
 	set.reachTime = simTime;
@@ -128,7 +128,7 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
 //	iss = iss / 10.0f; // problem with division?
 	iss = iss * 0.10f;
 
-	DEBUG_PRINT("\n\rsimTime: %f\n\rreachTime: %f\n\r\n\r", simTime, set.reachTime);
+	// DEBUG_PRINT("\n\rsimTime: %f\n\rreachTime: %f\n\r\n\r", simTime, set.reachTime);
 	
 	
 
@@ -140,7 +140,7 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
 	set.restartedComputation = 0; //restartedComputation;
 
 	// debugging for patrick
-	printf("Beginning Reachability Analysis >>>> initialStepSize: %f, reachTime: %f\n\n",set.initialStepSize,set.reachTime);
+	//printf("Beginning Reachability Analysis >>>> initialStepSize: %f, reachTime: %f\n\n",set.initialStepSize,set.reachTime);
 
 	return face_lifting_iterative_improvement_bicycle(startMs, &set,heading_input, throttle);
 }

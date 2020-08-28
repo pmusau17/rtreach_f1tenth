@@ -300,7 +300,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				hull = trackedRect;
             }
 			
-			println(&trackedRect);
+			// println(&trackedRect);
 			// debug changed so error tracker is always passed in (see note)
 			REAL timeElapsed = lift_single_rect_bicycle(&trackedRect, stepSize, timeRemaining, heading_input, throttle);
 
