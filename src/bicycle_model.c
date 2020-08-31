@@ -79,11 +79,11 @@ bool intermediateState(HyperRectangle* r)
 	// Alright for now I'm going to encode the cones in here manually.
 	// This isn't ideal but also it's a first step
 
-	double cone1[2][2] = {{1,2},{-0.5,0.5}};
-	double cone2[2][2] = {{3,4},{-0.5,0.5}};
-	double cone3[2][2] = {{5,6},{-0.5,0.5}};
-	double cone4[2][2] = {{7,8},{-0.5,0.5}};
-	double cone5[2][2] = {{9,10},{-0.5,0.5}};
+	double cone1[2][2] = {{1.5,2.5},{1.5,2.5}};
+	double cone2[2][2] = {{4.2,5.2},{2.2,3.2}};
+	double cone3[2][2] = {{10.86,11.86},{-1.96,-0.96}};
+	double cone4[2][2] = {{2.5,3.5},{5.9,6.9}};
+	double cone5[2][2] = {{-10.14,-9.14},{2.46,3.46}};
 
 	
     if(check_safety(r,cone1) && check_safety(r,cone2) && check_safety(r,cone3) && check_safety(r,cone4) && check_safety(r,cone5))
