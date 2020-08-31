@@ -257,6 +257,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 
 	// set the start time
 	struct timeval start;
+	int elapsedTotal;
 	gettimeofday(&start, NULL);
 	set_error_print_params(settings);
 
@@ -332,9 +333,9 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		} // This is the end of this first while loop 
 
 		int now = milliseconds2(&start);
-		int elapsedTotal = now;
+		elapsedTotal = now;
 
-		DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
+		
 
 		if (settings->maxRuntimeMilliseconds > 0)
 		{
@@ -375,7 +376,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		// apply error-reducing strategy
 		stepSize /= 2;
 	}
-
+	DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
 
 	return rv;

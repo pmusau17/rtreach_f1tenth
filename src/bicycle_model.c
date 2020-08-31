@@ -7,9 +7,13 @@
 
 
 
+// a note from the f1tenth simulator 
+// the car is 0.5 m long in the x direction 
+// 0.3 long in the y direction
+
+
 // declaration 
 bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
-
 // helper function to check safety
 bool check_safety(HyperRectangle* rect, REAL (*cone)[2]);
 
@@ -52,8 +56,23 @@ REAL getSimulatedSafeTime(REAL start[4],REAL heading_input,REAL throttle)
 bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
 {
 	
+
+	// bloat the box for the width of the car
+	rect->dims[0].min = rect->dims[0].min  - 0.25;
+	rect->dims[0].max = rect->dims[0].max  + 0.25;
+
+	rect->dims[1].min = rect->dims[1].min  - 0.15;
+	rect->dims[1].max = rect->dims[1].max  + 0.15;
+	
+
 	REAL l1[2] = {rect->dims[0].min,rect->dims[1].max};
     REAL r1[2] = {rect->dims[0].max,rect->dims[1].min};
+
+	// reset it
+	rect->dims[0].min = rect->dims[0].min  + 0.25;
+	rect->dims[0].max = rect->dims[0].max  - 0.25;
+	rect->dims[1].min = rect->dims[1].min  + 0.15;
+	rect->dims[1].max = rect->dims[1].max  - 0.15;
 
 	REAL l2[2] = {cone[0][0],cone[1][1]};
     REAL r2[2] = {cone[0][1],cone[1][0]};
@@ -95,7 +114,7 @@ bool intermediateState(HyperRectangle* r)
 	}
 
 	if(!allowed)
-		printf("unsafe..../n");
+		printf("unsafe....\n");
 	return allowed;
 }
 

@@ -35,6 +35,8 @@ const double sim_time = 1.5;
 double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
 
+bool stop = false;
+
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg)
 {
@@ -87,18 +89,15 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   ack_msg.drive.steering_angle = delta;
   ack_msg.drive.speed = u;
 
-
+  // ackermann_pub.publish(ack_msg);
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
-
-  if (safe_to_continue)
-  {
+  if (safe_to_continue && !stop)
       ackermann_pub.publish(ack_msg);
-  }
   else
   {
-    cout << "safe to continue: " << safe_to_continue << endl; 
+    cout << "not safe to continue: " << safe_to_continue << endl; 
+    stop = true;
   }
-  
   
 }
 
