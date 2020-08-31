@@ -31,16 +31,7 @@ bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 	return rv;
 }
 
-// This function enumerates all of the corners of the current HyperRectangle and 
-// returns whether or not any of the points lies outside of the ellipsoid
-bool finalState(HyperRectangle* rect)
-{
-	REAL maxPotential = 0.0;
 
-	// DEBUG_PRINT("--->  potential of final state = %f\n", maxPotential);
-
-	return maxPotential > 1;
-}
 
 // Simulation 
 REAL getSimulatedSafeTime(REAL start[4],REAL heading_input,REAL throttle)
@@ -72,9 +63,10 @@ bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
     
     if (l1[1] <= r2[1] || l2[1] <= r1[1]) 
         return true; 
-	
+
 	return false;
 }
+
 
 
 
@@ -105,6 +97,14 @@ bool intermediateState(HyperRectangle* r)
 	if(!allowed)
 		printf("unsafe..../n");
 	return allowed;
+}
+
+// This function enumerates all of the corners of the current HyperRectangle and 
+// returns whether or not any of the points lies outside of the ellipsoid
+bool finalState(HyperRectangle* rect)
+{
+
+	return intermediateState(rect);
 }
 
 

@@ -32,8 +32,8 @@ ros::Publisher ackermann_pub;
 
 // reachability parameters
 const double sim_time = 1.5;
-double ms = 0.0;
-const double walltime = 0.2;
+double ms = 0.0; // this is redundant will remove in refactoring
+const double walltime = 100; // this in ms apparently wtf the declaration doesn't say that 
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg)
@@ -43,6 +43,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
   double roll, pitch, yaw, lin_speed;
   double x,y,u,delta;
+  bool safe_to_continue;
 
   x = msg-> pose.pose.position.x;
   y = msg-> pose.pose.position.y;
@@ -87,8 +88,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   ack_msg.drive.speed = u;
 
   // ackermann_pub.publish(ack_msg);
-  ms =0.0;
-  runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+  safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+  cout << "safe to continue: " << safe_to_continue << endl; 
+  
 }
 
 

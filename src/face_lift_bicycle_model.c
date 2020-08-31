@@ -255,6 +255,9 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	bool rv = false;
 	bool lastIterationSafe = false;
 
+	// set the start time
+	struct timeval start;
+	gettimeofday(&start, NULL);
 	set_error_print_params(settings);
 
 	// Get the settings from the facelifting settings
@@ -328,8 +331,8 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 			timeRemaining -= timeElapsed;
 		} // This is the end of this first while loop 
 
-		int now = milliseconds();
-		int elapsedTotal = now - startMs;
+		int now = milliseconds2(&start);
+		int elapsedTotal = now;
 
 		DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 
@@ -344,16 +347,17 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 
 				rv = lastIterationSafe;
+				println(&hull);
 				break;
 			}
 
-			if (safe)
-			{
+			//if (safe)
+			//{
 				// already safe with current step size, break
-				DEBUG_PRINT("Found safe, stopping\n\r");
-				rv = true;
-				break;
-			}
+				//DEBUG_PRINT("Found safe, stopping\n\r");
+				//rv = true;
+				//break;
+			//}
 		}
 		else
 		{
