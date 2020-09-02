@@ -9,6 +9,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include "bicycle_safety.h"
+
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
 // It will also receive messages from the speed node which will dictate how fast the car should travel
@@ -18,6 +20,8 @@ extern "C"
 {
      double getSimulatedSafeTime(double start[4],double heading_input,double throttle);
      bool runReachability_bicycle(double * start, double  simTime, double  wallTimeMs, double  startMs,double  heading_input, double  throttle);
+     void deallocate_2darr(int rows,int columns);
+     void load_wallpoints(const char * filename, bool print)
 }
 
 
