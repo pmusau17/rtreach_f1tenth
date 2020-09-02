@@ -16,9 +16,12 @@
 #include "util.h"
 #include "main.h"
 #include "bicycle_model.h"
+#include "bicycle_safety.h"
 
 const int state_n = 4; // state dimension
 
+// This particular example also needs to know where the walls are
+const char * filepath= "/home/musaup/Documents/Research/rtreach_f1tenth/ros_src/rtreach/obstacles/porto_obstacles.txt";
 
 int main( int argc, const char* argv[] )
 {
@@ -55,7 +58,10 @@ int main( int argc, const char* argv[] )
     REAL timeToSafe = 2.0;
 
     // startMs 
-    int startMs = milliseconds();
+    int startMs = 0;
+
+	// load the wall points into the global variable
+	load_wallpoints(filepath,true);
     
     // run reachability analysis test 
     bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
@@ -65,6 +71,7 @@ int main( int argc, const char* argv[] )
 	//int safe = isSafe(runtimeMs, startState);
 
 	DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
+	deallocate_2darr(file_rows,file_columns);
 
 
 	return 0;

@@ -3,14 +3,20 @@
 #include "face_lift.h"
 #include "util.h"
 #include "simulate_bicycle.h"
+#include "bicycle_safety.h"
 #include <stdio.h>
-
+#include <string.h> 
+#include <stdlib.h>
 
 
 // a note from the f1tenth simulator 
 // the car is 0.5 m long in the x direction 
 // 0.3 long in the y direction
 
+
+// cones in the scenario we are considering, I'll get rid of these eventually
+double cones[5][2][2] = {{{1.5,2.5},{1.5,2.5}},{{4.2,5.2},{2.2,3.2}},
+						{{10.86,11.86},{-1.96,-0.96}},{{2.5,3.5},{5.9,6.9}},{{-10.14,-9.14},{2.46,3.46}}};
 
 // declaration 
 bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
@@ -50,68 +56,41 @@ REAL getSimulatedSafeTime(REAL start[4],REAL heading_input,REAL throttle)
 	return rv;
 }
 
-
-
-// helper function to check safety
-bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
-{
-	
-
-	// bloat the box for the width of the car
-	rect->dims[0].min = rect->dims[0].min  - 0.25;
-	rect->dims[0].max = rect->dims[0].max  + 0.25;
-
-	rect->dims[1].min = rect->dims[1].min  - 0.15;
-	rect->dims[1].max = rect->dims[1].max  + 0.15;
-	
-
-	REAL l1[2] = {rect->dims[0].min,rect->dims[1].max};
-    REAL r1[2] = {rect->dims[0].max,rect->dims[1].min};
-
-	// reset it
-	rect->dims[0].min = rect->dims[0].min  + 0.25;
-	rect->dims[0].max = rect->dims[0].max  - 0.25;
-	rect->dims[1].min = rect->dims[1].min  + 0.15;
-	rect->dims[1].max = rect->dims[1].max  - 0.15;
-
-	REAL l2[2] = {cone[0][0],cone[1][1]};
-    REAL r2[2] = {cone[0][1],cone[1][0]};
-	
-	if (l1[0] >= r2[0] || l2[0] >= r1[0]) 
-        return true; 
-    
-    if (l1[1] <= r2[1] || l2[1] <= r1[1]) 
-        return true; 
-
-	return false;
-}
-
-
-
-
 // called on states reached during the computation
 bool intermediateState(HyperRectangle* r)
 {
 	bool allowed = true;
 	//const REAL FIFTEEN_DEGREES_IN_RADIANS = 0.2618;
 
-	// Alright for now I'm going to encode the cones in here manually.
-	// This isn't ideal but also it's a first step
+	// bloat the box for the width of the car
+	r->dims[0].min = r->dims[0].min  - 0.25;
+	r->dims[0].max = r->dims[0].max  + 0.25;
+	r->dims[1].min = r->dims[1].min  - 0.15;
+	r->dims[1].max = r->dims[1].max  + 0.15;
 
-	double cone1[2][2] = {{1.5,2.5},{1.5,2.5}};
-	double cone2[2][2] = {{4.2,5.2},{2.2,3.2}};
-	double cone3[2][2] = {{10.86,11.86},{-1.96,-0.96}};
-	double cone4[2][2] = {{2.5,3.5},{5.9,6.9}};
-	double cone5[2][2] = {{-10.14,-9.14},{2.46,3.46}};
 
-	
-    if(check_safety(r,cone1) && check_safety(r,cone2) && check_safety(r,cone3) && check_safety(r,cone4) && check_safety(r,cone5))
+	// loop through the cones
+	for (int j = 0; j < 5; j++)
 	{
-		allowed = true;
+		allowed = check_safety(r,cones[j]);
+		if(!allowed)
+        {
+            printf("offending cone (%f,%f) (%f, %f)\n",cones[j][0][0],cones[j][0][1],cones[j][1][0],cones[j][1][1]);
+            break;
+        }
+		
 	}
-	else{
-		allowed = false;
+
+	if(allowed)
+	{
+		allowed = check_safety_wall(r);
 	}
+	
+	// reset it
+	r->dims[0].min = r->dims[0].min  + 0.25;
+	r->dims[0].max = r->dims[0].max  - 0.25;
+	r->dims[1].min = r->dims[1].min  + 0.15;
+	r->dims[1].max = r->dims[1].max  - 0.15;
 
 	if(!allowed)
 		printf("unsafe....\n");
