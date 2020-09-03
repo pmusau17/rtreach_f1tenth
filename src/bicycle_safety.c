@@ -87,7 +87,7 @@ void load_wallpoints(const char * filename, bool print)
     wallPoints = fopen(filename,"r");
     if(wallPoints==NULL)
     {
-        printf("Could not open file %s",filename);
+        printf("Could not open file %s\n",filename);
     }
     else
     {

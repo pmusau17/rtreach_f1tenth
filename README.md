@@ -93,7 +93,6 @@ Copy the rtreach shared library into the package:
 
 ```
 cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
-
 ```
 
 ```
@@ -114,7 +113,7 @@ roslaunch race rtreach.launch world_name:=track_porto model_name:=minivgg_3.hdf5
 ```
 
 ```
-rosrun rtreach reach_node_sync
+rosrun rtreach reach_node_sync porto_obstacles.txt
 ```
 
 You can select a world file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/simulator/racecar-simulator/racecar_gazebo/worlds). You can also select a model file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). 

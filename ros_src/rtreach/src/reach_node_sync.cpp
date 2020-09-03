@@ -25,10 +25,6 @@ extern "C"
      void load_wallpoints(const char * filename, bool print);
 }
 
-
-
-
-
 /**
 * NodeHandle is the main access point to communications with the ROS system.
 * The first NodeHandle constructed will fully initialize this node, and the last
@@ -97,7 +93,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   ack_msg.drive.steering_angle = delta;
   ack_msg.drive.speed = u;
 
-  /*
+  
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
   if (safe_to_continue && !stop)
       ackermann_pub.publish(ack_msg);
@@ -105,7 +101,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   {
     cout << "not safe to continue: " << safe_to_continue << endl; 
     stop = true;
-  }*/
+  }
   
 }
 
@@ -115,7 +111,9 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
-    std::cout << path << std::endl;
+    std::string filename = argv[1];
+    path = path + "/obstacles/"+filename;
+    load_wallpoints(path.c_str(),true);
 
 
     using namespace message_filters;
@@ -145,7 +143,13 @@ int main(int argc, char **argv)
     sync.registerCallback(boost::bind(&callback, _1, _2,_3));
 
 
-    ros::spin();
+    while(ros::ok())
+    {
+      ros::spinOnce();
+    }
+
+    // delete the memory allocated to store the wall points
+    deallocate_2darr(file_rows,file_columns);
 
 
     return 0; 
