@@ -46,7 +46,7 @@ const double walltime = 80; // this in ms apparently wtf the declaration doesn't
 bool stop = false;
 
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg)
+void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg)
 {
   using std::cout;
   using std::endl;
@@ -103,6 +103,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       ackermann_pub.publish(ack_msg);
   else
   {
+    ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
+    ack_msg.drive.speed = safety_msg->drive.speed;
+    ackermann_pub.publish(ack_msg);
     cout << "safe to continue: " << safe_to_continue << endl; 
     stop = true;
   }
@@ -136,15 +139,16 @@ int main(int argc, char **argv)
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar/angle_msg", 10);
+    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 10);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
   
 
 
-    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), odom_sub, vel_sub,angle_sub);
-    sync.registerCallback(boost::bind(&callback, _1, _2,_3));
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), odom_sub, vel_sub,angle_sub,safety_sub);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
 
 
     while(ros::ok())
