@@ -25,6 +25,10 @@ extern "C"
      void load_wallpoints(const char * filename, bool print);
 }
 
+
+
+
+
 /**
 * NodeHandle is the main access point to communications with the ROS system.
 * The first NodeHandle constructed will fully initialize this node, and the last
@@ -35,7 +39,7 @@ extern "C"
 ros::Publisher ackermann_pub; 
 
 // reachability parameters
-const double sim_time = 1.5;
+const double sim_time = 0.3;
 double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
 
@@ -99,7 +103,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       ackermann_pub.publish(ack_msg);
   else
   {
-    cout << "not safe to continue: " << safe_to_continue << endl; 
+    cout << "safe to continue: " << safe_to_continue << endl; 
     stop = true;
   }
   

@@ -348,10 +348,10 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 
 				rv = lastIterationSafe;
-				println(&hull);
 				break;
 			}
-
+			if(!safe)
+				println(&hull);
 			//if (safe)
 			//{
 				// already safe with current step size, break

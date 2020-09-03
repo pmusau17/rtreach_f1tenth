@@ -15,8 +15,8 @@
 
 
 // cones in the scenario we are considering, I'll get rid of these eventually
-double cones[5][2][2] = {{{1.5,2.5},{1.5,2.5}},{{4.2,5.2},{2.2,3.2}},
-						{{10.86,11.86},{-1.96,-0.96}},{{2.5,3.5},{5.9,6.9}},{{-10.14,-9.14},{2.46,3.46}}};
+double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635, 2.765}},
+						{{11.295, 11.425},{-1.525, -1.395}},{{2.935, 3.065},{6.335, 6.465}},{{-9.705, -9.575},{2.895, 3.025}}};
 
 // declaration 
 bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
