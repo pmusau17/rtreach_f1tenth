@@ -9,7 +9,7 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include "bicycle_safety.h"
+#include <ros/package.h>
 
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
@@ -17,12 +17,16 @@
 // Initially the assmumption will be the the car moves at constant velocity
 
 extern "C"
-{
+{ 
+     #include "bicycle_safety.h"
      double getSimulatedSafeTime(double start[4],double heading_input,double throttle);
      bool runReachability_bicycle(double * start, double  simTime, double  wallTimeMs, double  startMs,double  heading_input, double  throttle);
      void deallocate_2darr(int rows,int columns);
-     void load_wallpoints(const char * filename, bool print)
+     void load_wallpoints(const char * filename, bool print);
 }
+
+
+
 
 
 /**
@@ -93,7 +97,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   ack_msg.drive.steering_angle = delta;
   ack_msg.drive.speed = u;
 
-  // ackermann_pub.publish(ack_msg);
+  /*
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
   if (safe_to_continue && !stop)
       ackermann_pub.publish(ack_msg);
@@ -101,13 +105,18 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   {
     cout << "not safe to continue: " << safe_to_continue << endl; 
     stop = true;
-  }
+  }*/
   
 }
 
 
 int main(int argc, char **argv)
 {
+
+    // get the path to the file containing the wall points 
+    std::string path = ros::package::getPath("rtreach");
+    std::cout << path << std::endl;
+
 
     using namespace message_filters;
 

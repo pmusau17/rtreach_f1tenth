@@ -8,7 +8,7 @@
 ### Compile the verification code via:  
 
 ```
-gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c  bicycle_safety.c main.c bicycle_model.c  -lm -o bicycle -DBICYCLE_MODEL_NONLINEAR
+gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c  bicycle_safety.c main.c bicycle_model.c  -lm -o bicycle 
 ```
 
 ### Run a two second simulation using the following command
@@ -22,8 +22,7 @@ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simula
 compile the code: 
 
 ```
-gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot -DBICYCLE_MODEL_NONLINEAR
-
+gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot 
 ```
 
 Then: 
@@ -46,7 +45,7 @@ Credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/)
 First create a library of the code:
 
 ```
-gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm -DBICYCLE_MODEL_NONLINEAR
+gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm 
 ```
 
 Next create a shared library:
@@ -64,15 +63,13 @@ g++ -L/home/musaup/Documents/Research/rtreach_f1tenth/src/ -Wall test.cpp -o tes
 ```
 $ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 $ ./test
-
-The output should be: 
-
 ``` 
+
+The output should be:
+```
 Quitting simulation: time: 2.020000, stepSize: 0.020000
 If you keep the same input for the next 2.000000 s, the state will be: 
  [-1.143228,0.000000,-0.772037,0.000000]
-```
-
 ```
 
 ### Using rtreach with the F1Tenth simulator
@@ -82,6 +79,7 @@ This assumes that you have the F1Tenth Simulator installed. If not please instal
 Once that is installed, create the ros package: 
 
 ```
+ cd ..
  mkdir -p ../rtreach_ros/src
 ```
 
@@ -94,7 +92,8 @@ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 Copy the rtreach shared library into the package:
 
 ```
-cp src/libRtreach.so ../rtreach_ros/src/rtreach/src/
+cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
+
 ```
 
 ```
