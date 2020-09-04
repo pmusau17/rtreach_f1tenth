@@ -26,9 +26,6 @@ extern "C"
 }
 
 
-
-
-
 /**
 * NodeHandle is the main access point to communications with the ROS system.
 * The first NodeHandle constructed will fully initialize this node, and the last
@@ -44,6 +41,7 @@ double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
 
 bool stop = false;
+int safePeriods =0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg)
@@ -93,21 +91,34 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
 
   ackermann_msgs::AckermannDriveStamped ack_msg;
-  ack_msg.header.stamp = ros::Time::now();
-  ack_msg.drive.steering_angle = delta;
-  ack_msg.drive.speed = u;
-
+  
+ 
+  if(stop && safePeriods>20)
+  {
+    stop = false;
+  }
   
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
   if (safe_to_continue && !stop)
+  {
+      ack_msg.drive.steering_angle = delta;
+      ack_msg.drive.speed = u;
+      ack_msg.header.stamp = ros::Time::now();
       ackermann_pub.publish(ack_msg);
+  }
+      
   else
   {
-    ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
-    ack_msg.drive.speed = safety_msg->drive.speed;
-    ackermann_pub.publish(ack_msg);
-    cout << "safe to continue: " << safe_to_continue << endl; 
-    stop = true;
+      ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
+      ack_msg.drive.speed = safety_msg->drive.speed;
+      ack_msg.header.stamp = ros::Time::now();
+      ackermann_pub.publish(ack_msg);
+      cout << "using safety controller...safe?: " << safe_to_continue << endl; 
+      stop = true;
+      if(safe_to_continue)
+      {
+        safePeriods+=1;
+      }
   }
   
 }

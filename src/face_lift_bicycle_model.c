@@ -346,7 +346,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
-
+				println(&hull);
 				rv = lastIterationSafe;
 				break;
 			}
