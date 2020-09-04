@@ -10,6 +10,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <ros/package.h>
+#include <ros/console.h>
 
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
@@ -36,7 +37,7 @@ extern "C"
 ros::Publisher ackermann_pub; 
 
 // reachability parameters
-const double sim_time = 0.3;
+const double sim_time = 1.0;
 double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
 
@@ -97,8 +98,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   {
     stop = false;
   }
-  
+
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+
   if (safe_to_continue && !stop)
   {
       ack_msg.drive.steering_angle = delta;
@@ -109,17 +111,25 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       
   else
   {
+      cout << "safe: angle: " << safety_msg->drive.steering_angle << " safe speed: " << safety_msg->drive.speed << endl;
       ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
       ack_msg.drive.speed = safety_msg->drive.speed;
       ack_msg.header.stamp = ros::Time::now();
       ackermann_pub.publish(ack_msg);
+      ROS_WARN("using safety controller.");
       cout << "using safety controller...safe?: " << safe_to_continue << endl; 
       stop = true;
-      if(safe_to_continue)
-      {
-        safePeriods+=1;
-      }
   }
+
+  if(stop & safe_to_continue)
+  {
+    safePeriods+=1;
+  }
+  else
+  {
+    safePeriods = 0;
+  }
+  
   
 }
 
@@ -150,7 +160,7 @@ int main(int argc, char **argv)
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar/angle_msg", 10);
-    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 10);
+    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 1);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
   
@@ -158,7 +168,7 @@ int main(int argc, char **argv)
 
     typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), odom_sub, vel_sub,angle_sub,safety_sub);
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
 
 
