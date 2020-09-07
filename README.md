@@ -12,7 +12,7 @@ This repo is an implementation of a runtime assurance approach by [Stanley Bak e
 #### Neural Network + Monitor + Safety Controller
 ![safety_node.gif](images/safety_node.gif)
 
-**Disclaimer**: Our assumption is that you are using linux, since a major part of this effort involves ROS. This code was tested on a computer running Ubuntu 16.04.6 LTS.
+**Disclaimer**: Our assumption is that you are using linux. A major part of this effort involves ROS. This code was tested on a computer running Ubuntu 16.04.6 LTS.
 
 ## Intro to rtreach: Let's start with an example. 
 
