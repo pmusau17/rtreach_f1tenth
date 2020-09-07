@@ -1,9 +1,7 @@
 # F1Tenth Rtreach
 
 
-### Real Time Reachability on the F1Tenth Platform 
-
-![Block Diagram](images/rtreach.png)
+### Real Time Reachability for the F1Tenth Platform 
 
 This repo is an implementation of a runtime assurance approach by [Stanley Bak et al.](https://ieeexplore.ieee.org/document/7010482) for the F1Tenth platform. The motivation for runtime assurance stems from the ever-increasing complexity of software needed to control autonomous systems, and the need for these systems to be certified for safety and correctness. Thus the methods contained herein are used to build monitors for the system that can be used to ensure that the system remains within a safe operating mode. As an example, in the following animations we display a system with an unsafe neural network inspired controller that occasionally causes the f1tenth model to crash into walls. In the second animation, we add a real time safety monitor that switches to a safe controller when it detects a potential collision. Though the safety controller sacrifices performance it ensures that we do not collide with obstacles. The safety monitor was designed using the algorithms described by Bak et al. 
 
@@ -77,43 +75,54 @@ Finally, (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch
 ```
  $ gnuplot < plot_bicycle.gnuplot
 ```
-Usage: bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
-
-
-### Building the code as a library so we can use it in ROS
-
-Credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/)
-
-First create a library of the code:
+Usage of plotting utilities: 
 
 ```
-gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm 
+$ ./bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
+```
+
+### Building rtreach as a C library. 
+
+Now that you have a taste of what rtreach is, we can move on to the more fun part. Using rtreach within ROS. By doing this, we can implement a safety monitor using the archtichture displayed again below: 
+
+![Block Diagram](images/rtreach.png)
+
+First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
+
+```
+$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm 
 ```
 
 Next create a shared library:
 
 ```
-gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
+$ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
 ```
 
-This will create a file called **libRtreach.so**. Compile the test to make sure everything worked correctly.
+This will create a file called **libRtreach.so**. 
+
+Let's compile a test to make sure everything worked correctly.
 
 ```
-g++ -L/home/musaup/Documents/Research/rtreach_f1tenth/src/ -Wall test.cpp -o test -lRtreach
+$ g++ -L$(pwd)/ -Wall test.cpp -o test -lRtreach
 ```
+
+Before running the executable make sure that the path of shared library is contain in the environment variable LD_LIBRARY_PATH.
 
 ```
 $ export LD_LIBRARY_PATH=$(pwd):$LD_LIBRARY_PATH
 $ ./test
 ``` 
 
-The output should be:
+The output of the test should be:
 
 ```
 Quitting simulation: time: 2.020000, stepSize: 0.020000
 If you keep the same input for the next 2.000000 s, the state will be: 
- [-1.143228,0.000000,-0.772037,0.000000]
+ [1.931151,0.000000,1.249570,0.000000] 
 ```
+
+If that test worked. Smile, take a breath and let's have some fun with ROS. If not feel free to send me an email and we will see what we can do. 
 
 ### Using rtreach with the F1Tenth simulator
 
