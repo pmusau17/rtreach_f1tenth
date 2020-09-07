@@ -5,7 +5,7 @@
 
 ![Block Diagram](images/rtreach.png)
 
-This repo is an implementation of a runtime assurance approach by [Stanley Bak et al.](https://ieeexplore.ieee.org/document/7010482) for the F1Tenth platform. The motivation for runtime assurance stems from the ever-increasing complexity of software needed to control autonomous systems, and the need for these systems to be certified for safety and correctness. Thus the methods contained herein are used to build monitors for the system that can be used to ensure that the system remains within a safe operating mode. As an example, in the following animations we display a system with an unsafe neural network inspired controller that occasionally causes the f1tenth model to crash into walls. In the second animation, we add a safety monitor that switches to a safe controller when it detects a potential collision. Though the safety controller sacrifices performance it ensures that we do not collide with obstacles. The safety monitor was designed using the algorithms described by Bak et al. 
+This repo is an implementation of a runtime assurance approach by [Stanley Bak et al.](https://ieeexplore.ieee.org/document/7010482) for the F1Tenth platform. The motivation for runtime assurance stems from the ever-increasing complexity of software needed to control autonomous systems, and the need for these systems to be certified for safety and correctness. Thus the methods contained herein are used to build monitors for the system that can be used to ensure that the system remains within a safe operating mode. As an example, in the following animations we display a system with an unsafe neural network inspired controller that occasionally causes the f1tenth model to crash into walls. In the second animation, we add a real time safety monitor that switches to a safe controller when it detects a potential collision. Though the safety controller sacrifices performance it ensures that we do not collide with obstacles. The safety monitor was designed using the algorithms described by Bak et al. 
 
 
 #### Neural Network Only (LEC)
@@ -14,38 +14,71 @@ This repo is an implementation of a runtime assurance approach by [Stanley Bak e
 #### Neural Network + Monitor + Safety Controller
 ![safety_node.gif](images/safety_node.gif)
 
-### Compile the verification code via:  
+
+## Intro to rtreach: Let's start with an example. 
+
+The safey monitor implemented in this repository relies on an anytime real-time reachability algorithm based on [mixed face-lifting](http://www.taylortjohnson.com/research/bak2014rtss.pdf). The reach-sets obtained using this method are represented as hyper-rectangles and we utilize these reachsets to check for collisons with obstacles in the vehicle's environment. The following example shows the use of this algorithm to check whether the vehicle will enter an unsafe operating mode in the next one second using the current control command. 
+
+#### Before we continue let's first compile the example code by executing the following:  
 
 ```
-gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c  bicycle_safety.c main.c bicycle_model.c  -lm -o bicycle 
+$ cd src/
+$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c  bicycle_safety.c main.c bicycle_model.c  -lm -o bicycle 
+```
+In this example, our vehicle is at the origin (x = 0, y = 0) with a current heading of 0 radians and an initial linear velocity of 0 m/s. The current control command being considered issues a speed set point of 1 m/s and a steering angle of 0.266 radians. Executing the code below will print whether or not the vehicle will enter an unsafe state. The alloted time that we have specified for reachability computations is 100ms. Since our technique is anytime it refines the precision of the reachability computation based on available runtime by halving the step size used in the face-lifting technique.
+
+### Run a one second simulation using the following command
+
+```
+$ ./bicycle 100 0.0 0.0 0.0 0.0 1.0 0.2666
 ```
 
-### Run a two second simulation using the following command
+Expected output: 
+```
+runtime: 100 ms
+x_0[0]: 0.000000
+x_0[1]: 0.000000
+x_0[2]: 0.000000
+x_0[3]: 0.000000
+u_0[0]: 1.000000
+u_0[1]: 0.266600
 
+Quitting simulation: time: 2.020000, stepSize: 0.020000
+If you keep the same input for the next 2.000000 s, the state will be: 
+ [1.545528,1.046166,1.283163,1.203507] 
+
+Opening file...with 5536 points
+offending cone (1.500000,2.500000) (1.500000, 2.500000)
+unsafe....
+Quitting from runtime maxed out
+[HyperRectangle (1.527867, 1.529682) (1.032242, 1.033770) (1.280197, 1.280286) (1.188098, 1.188847)]
+133ms: stepSize = 0.000391
+iterations at quit: 10
+done, result = safe
+Done
 ```
-./bicycle 100 0.0 0.0 0.0 0.0 1.0 0.2666
-```
+As we can see our initial computation identified a collision with a cone in the vehicle's environment but by refining the reachset in successive iterations of the reachability computation, it becomes clear that this warning is spurious. 
 
 ### Plotting of Reachsets
 
-compile the code: 
+We can visualize the results of the above example by executing the following: 
 
 ```
-gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot 
+$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot 
 ```
 
-Then: 
+ and then: 
 
 ```
-./bicycle_plot 100 2.0 0.0 0.0 0.0 0.0 16.0 0.2666
+$ ./bicycle_plot 100 2.0 0.0 0.0 0.0 0.0 16.0 0.2666
 ``` 
+
+Finally, (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch01s03.html)), you can visualize the results by running: 
+```
+ $ gnuplot < plot_bicycle.gnuplot
+```
 Usage: bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
 
-Finally (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch01s03.html)):
-
-```
-gnuplot < plot_bicycle.gnuplot
-```
 
 ### Building the code as a library so we can use it in ROS
 
