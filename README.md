@@ -12,6 +12,7 @@ This repo is an implementation of a runtime assurance approach by [Stanley Bak e
 #### Neural Network + Monitor + Safety Controller
 ![safety_node.gif](images/safety_node.gif)
 
+**Disclaimer**: Our assumption is that you are using linux, since a major part of this effort involves ROS. This code was tested on a computer running Ubuntu 16.04.6 LTS.
 
 ## Intro to rtreach: Let's start with an example. 
 
@@ -122,11 +123,11 @@ If you keep the same input for the next 2.000000 s, the state will be:
  [1.931151,0.000000,1.249570,0.000000] 
 ```
 
-If that test worked. Smile, take a breath and let's have some fun with ROS. If not feel free to send me an email and we will see what we can do. 
+If that test worked, smile, take a breath and let's have some fun with ROS. If not feel free to send me an [email](mailto:patrick.musau@vanderbilt.edu) and we will see what we can do. 
 
 ### Using rtreach with the F1Tenth simulator
 
-This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
+The platform that we seek to use these techniques on is a 1/10 scale autonomous race car named the [F1Tenth](https://f1tenth.org/). The platform was inspired as an international competition for researchers, engineers, and autonomous systems enthusiasts originally founded ath University of Pennsylvania in 2016. Our initial implmentation is done in simulation but we are also planning on doing this on the hardware platform. Thus, This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
 
 Once that is installed, create the ros package: 
 
@@ -146,7 +147,7 @@ Copy the rtreach shared library into the package:
 ```
 cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
 ```
-
+Build the ros-package.
 ```
 cd ../rtreach_ros && catkin_make
 ```
@@ -157,10 +158,10 @@ source devel/setup.bash
 
 ### Running Rtreach
 
-Start the simulator with the specified track:
+Start the simulation.
 
 ```
-roslaunch race rtreach.launch world_name:=track_porto model_name:=minivgg_3.hdf5
+roslaunch race rtreach.launch 
 ```
 
 ```
