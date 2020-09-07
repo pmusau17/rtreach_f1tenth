@@ -151,6 +151,7 @@ Build the ros-package.
 ```
 cd ../rtreach_ros && catkin_make
 ```
+and then: 
 
 ```
 source devel/setup.bash
@@ -158,25 +159,31 @@ source devel/setup.bash
 
 ### Running Rtreach
 
-Start the simulation.
+Start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle.
 
 ```
 roslaunch race rtreach.launch 
 ```
 
+The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8. The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
+
+
+Run the safety monitor + safety_controller + neural network controller. 
+
 ```
 rosrun rtreach reach_node_sync porto_obstacles.txt
 ```
+In this setup the decision manager will allow the neural network model to control the vehicle so long as the control command issue will not cause the vehicle to enter an unsafe state in the next one second. Otherwise the safety controller will be used. The decision manager can then return to the neural network controller provided that the car has been in a safe operating mode for 20 control steps. 
 
-You can select a world file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/simulator/racecar-simulator/racecar_gazebo/worlds). You can also select a model file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). 
 
+To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
 
 ## Repository Organization
 
-**ros_src/rtreach-** ros-package containing rtreach implementation:
+**ros_src/rtreach:** ros-package containing rtreach implementation.
 - [reach_node_sync.cpp](ros_src/rtreach/src/reach_node_sync.cpp): ROS-node implementation of safety monitor and controller. 
 
-**src-** C-implementation of rtreach:
+**src:** C-implementation of rtreach.
 - [dynamics_bicycle_model.c](src/dynamics_bicycle_model.c): Interval arithmetic implementation of a kinematic bicycle model for a car. Parameters are identified using [grey-box system identification](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/race/csv).
 - [interval.c](src/interval.c): Implementation of interval arithmetic methods.
 - [geometry.c](src/geometry.c): Implementation of hyper-rectangle methods.
@@ -188,4 +195,6 @@ You can select a world file from the following [directory](https://github.com/pm
 - [bicycle_model_plots.c](src/bicycle_model_plots.c): Same as above but intented for plotting purposes.
 - [util.c](src/util.c): Helper functions for timing and printing. 
 
+#### Coming soon...
+Dockerized implementation. Bug me if this doesn't happen soon.
 
