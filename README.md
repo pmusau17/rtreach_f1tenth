@@ -134,7 +134,7 @@ You can select a world file from the following [directory](https://github.com/pm
 - [reach_node_sync.cpp](ros_src/rtreach/src/reach_node_sync.cpp): ROS-node implementation of safety monitor and controller. 
 
 **src-** C-implementation of rtreach:
-- [dynamics_bicycle_model.c](src/dynamics_bicycle_model.c): Interval arithmetic implementation of a kinematic bicycle model for a car. Parameters are identified using [sysid](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/race/csv).
+- [dynamics_bicycle_model.c](src/dynamics_bicycle_model.c): Interval arithmetic implementation of a kinematic bicycle model for a car. Parameters are identified using [grey-box system identification](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/race/csv).
 - [interval.c](src/interval.c): Implementation of interval arithmetic methods.
 - [geometry.c](src/geometry.c): Implementation of hyper-rectangle methods.
 - [face_lift_bicycle_model.c](src/face_lift_bicycle_model.c): Facelifting method implementation with bicycle model dynamics.
