@@ -72,10 +72,10 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   tf::Vector3 speed = tf::Vector3(msg->twist.twist.linear.x, msg->twist.twist.linear.x, 0.0);
   lin_speed = speed.length();
 
-  cout << "x: " << x << endl;
-  cout << "y: " << y << endl;
-  cout << "yaw: " << yaw << endl;
-  cout << "speed: " << lin_speed << endl;
+  cout << "x: " << x;
+  cout << " y: " << y;
+  cout << " yaw: " << yaw;
+  cout << " speed: " << lin_speed << endl;
 
 
   u = velocity_msg->velocity;
@@ -100,7 +100,6 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   }
 
   safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
-
   if (safe_to_continue && !stop)
   {
       ack_msg.drive.steering_angle = delta;
@@ -139,7 +138,15 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
+    
+    if(argv[1] == NULL)
+    {
+        std::cout << "Please provide the file containing the obstacle locations (i.e porto_obstacles.txt)" << std::endl;
+        exit(0);
+    }
+   
     std::string filename = argv[1];
+
     path = path + "/obstacles/"+filename;
     load_wallpoints(path.c_str(),true);
 
