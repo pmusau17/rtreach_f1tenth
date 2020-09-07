@@ -41,13 +41,13 @@ Then:
 ``` 
 Usage: bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
 
-and finally (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch01s03.html)):
+Finally (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch01s03.html)):
 
 ```
 gnuplot < plot_bicycle.gnuplot
 ```
 
-# Building the code as a library so we can use it in ROS
+### Building the code as a library so we can use it in ROS
 
 Credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/)
 
@@ -63,7 +63,7 @@ Next create a shared library:
 gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
 ```
 
-this will create a file called libRtreach.so. Compile the test to make sure everything worked correctly.
+This will create a file called **libRtreach.so**. Compile the test to make sure everything worked correctly.
 
 ```
 g++ -L/home/musaup/Documents/Research/rtreach_f1tenth/src/ -Wall test.cpp -o test -lRtreach
@@ -75,6 +75,7 @@ $ ./test
 ``` 
 
 The output should be:
+
 ```
 Quitting simulation: time: 2.020000, stepSize: 0.020000
 If you keep the same input for the next 2.000000 s, the state will be: 
@@ -108,7 +109,6 @@ cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics
 cd ../rtreach_ros && catkin_make
 ```
 
-
 ```
 source devel/setup.bash
 ```
@@ -127,5 +127,22 @@ rosrun rtreach reach_node_sync porto_obstacles.txt
 
 You can select a world file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/simulator/racecar-simulator/racecar_gazebo/worlds). You can also select a model file from the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). 
 
+
+## Repository Organization
+
+**ros_src/rtreach-** ros-package containing rtreach implementation:
+- [reach_node_sync.cpp](ros_src/rtreach/src/reach_node_sync.cpp): ROS-node implementation of safety monitor and controller. 
+
+**src-** C-implementation of rtreach:
+- [dynamics_bicycle_model.c](src/dynamics_bicycle_model.c): Interval arithmetic implementation of a kinematic bicycle model for a car. Parameters are identified using [sysid](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/race/csv).
+- [interval.c](src/interval.c): Implementation of interval arithmetic methods.
+- [geometry.c](src/geometry.c): Implementation of hyper-rectangle methods.
+- [face_lift_bicycle_model.c](src/face_lift_bicycle_model.c): Facelifting method implementation with bicycle model dynamics.
+- [bicycle_safety.c](src/bicycle_safety.c): Implementation of safety checking for the f1tenth model. Current checking includes static obstacles and collisions with walls.
+- [simulate_bicycle.c](src/simulate_bicycle.c): Implementation of Euler simulation of kinematic bicycle model. 
+- [simulate_bicycle_plots.c](src/simulate_bicycle_plots.c): Implementation of methods for plotting for reach sets.
+- [bicycle_model.c](src/bicycle_model.c): Implementation of safety checking for f1tenth platform, makes use of the facelifting algorithms in [face_lift_bicycle_model.c](src/face_lift_bicycle_model.c).
+- [bicycle_model_plots.c](src/bicycle_model_plots.c): Same as above but intented for plotting purposes.
+- [util.c](src/util.c): Helper functions for timing and printing. 
 
 
