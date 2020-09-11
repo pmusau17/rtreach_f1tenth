@@ -104,7 +104,7 @@ void hyperrectangle_to_file(FILE* fout, HyperRectangle* r, int styleIndex)
 		const char* styleStr[] =
 		{
 			"set label ' Init' at %f, %f point pointtype 3 lc rgb 'blue' tc rgb 'blue'",
-			"set obj rect from %f, %f to %f, %f fc rgbcolor 'dark-green' fs solid 0.2 noborder\n",
+			"set obj rect from %f, %f to %f, %f fc rgbcolor 'dark-green' fs solid 0.2 \n",
 			"set obj rect from %f, %f to %f, %f fc rgbcolor 'red' fs solid 0.3 noborder\n",
 		};
 
