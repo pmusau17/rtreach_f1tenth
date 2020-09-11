@@ -69,7 +69,7 @@ $ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simu
  and then: 
 
 ```
-$ ./bicycle_plot 100 2.0 0.0 0.0 0.0 0.0 16.0 0.2666
+$ ./bicycle_plot 100 2.0 0.0 0.0 0.0 0.0 1.0 0.2666
 ``` 
 
 Finally, (assuming you have [gnuplot](http://gausssum.sourceforge.net/DocBook/ch01s03.html)), you can visualize the results by running: 

@@ -21,7 +21,7 @@
 const int state_n = 4; // state dimension
 
 // This particular example also needs to know where the walls are
-const char * filepath= "/home/musaup/Documents/Research/rtreach_f1tenth/ros_src/rtreach/obstacles/porto_obstacles.txt";
+const char * filepath= "../ros_src/rtreach/obstacles/porto_obstacles.txt";
 
 int main( int argc, const char* argv[] )
 {

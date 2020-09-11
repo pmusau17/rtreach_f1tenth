@@ -10,7 +10,7 @@ static FILE* simulation_file;
 
 // declarations
 void open_sim_file(bool openInitial);
-void hyperrectangle_to_point_file(FILE* fout, REAL (*point)[NUM_DIMS]);
+void hyperrectangle_to_point_file(FILE* fout, REAL *point);
 bool close_file(bool closeInitial);
 
 
@@ -37,8 +37,8 @@ bool close_file(bool closeInitial)
 }
 
 
-// styleIndex: 0 = init, 1 = intermediate, 2 = final
-void hyperrectangle_to_point_file(FILE* fout, REAL (*point)[NUM_DIMS])
+
+void hyperrectangle_to_point_file(FILE* fout, REAL *point)
 {
 	if (fout)
 	{
@@ -47,7 +47,7 @@ void hyperrectangle_to_point_file(FILE* fout, REAL (*point)[NUM_DIMS])
 		int Y_DIM = 1;
 
 		const char* styleStr = "%f\t%f\n";
-
+		//printf("%f\t%f\n",*point[X_DIM], *point[Y_DIM]);
 
 		fprintf(fout, styleStr, point[X_DIM], point[Y_DIM]);
 	}
@@ -67,6 +67,10 @@ void simulate_bicycle_plots(REAL startPoint[NUM_DIMS], REAL heading_input, REAL 
 	for (int d = 0; d < NUM_DIMS; ++d) {
 		point[d] = startPoint[d];
         }
+
+
+	// record start state of simulation
+	hyperrectangle_to_point_file(simulation_file, point);
 
 	// declare a hyperRectangle: an array of intervals
 	HyperRectangle rect;
@@ -98,12 +102,12 @@ void simulate_bicycle_plots(REAL startPoint[NUM_DIMS], REAL heading_input, REAL 
 		// euler's method
 		for (int d = 0; d < NUM_DIMS; ++d)
 		{
-            hyperrectangle_to_point_file(simulation_file, &point);
 			REAL der = get_derivative_bounds_bicycle(&rect, 2*d,heading_input,throttle);
-
-			printf("point x: %f point y: %f \n",point[0],point[1]);
 			point[d] += stepSize * der;
 		}
+
+		// log the point to a file
+		hyperrectangle_to_point_file(simulation_file, point);
 
 		time += stepSize;
 	}

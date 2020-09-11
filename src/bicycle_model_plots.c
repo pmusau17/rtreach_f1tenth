@@ -38,8 +38,6 @@ bool finalState(HyperRectangle* rect)
 {
 	REAL maxPotential = 0.0;
 
-	DEBUG_PRINT("--->  potential of final state = %f\n", maxPotential);
-
 	return maxPotential > 1;
 }
 

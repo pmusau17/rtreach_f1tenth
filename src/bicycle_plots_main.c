@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
 #include "bicycle_model.h"
 #include "util.h"
 
@@ -35,8 +34,8 @@ int main(int argc, char** argv)
 		double startState[4] = {atof(argv[3]), atof(argv[4]), atof(argv[5]), atof(argv[6])};
 		REAL control_input[2] = {0.0,0.0};
 
-		control_input[0] = atof(argv[6]);
-        control_input[1] = atof(argv[7]);
+		control_input[0] = atof(argv[7]);
+        control_input[1] = atof(argv[8]);
 
 		DEBUG_PRINT("runtime: %d ms\n\rx_0[0]: %f\n\rx_0[1]: %f\n\rx_0[2]: %f\n\rx_0[3]: %f\n\ru_0[0]: %f\n\ru_0[1]: %f\n\r\n", ms, startState[0], startState[1], startState[2], startState[3],control_input[0],control_input[1]);
 
