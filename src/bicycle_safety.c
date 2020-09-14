@@ -1,3 +1,7 @@
+// Patrick Musau
+// 08-2020
+// Safety checking for f1tenth model file
+
 #include "bicycle_safety.h"
 #include <stdio.h>
 #include <stdbool.h>
