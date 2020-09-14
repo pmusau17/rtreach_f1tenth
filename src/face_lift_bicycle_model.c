@@ -134,10 +134,6 @@ REAL lift_single_rect_bicycle(HyperRectangle* rect, REAL stepSize, REAL timeRema
 			
 			REAL newNebWidth = der * stepSize; // the projection of the derivative is tempered by the stepSize
 
-			
-			
-			// Print Patrick printf("face: %d, isMin: %d, prevNebWidth: %f, newNebWidth:%f\n",f,isMin,prevNebWidth,newNebWidth);
-			
 			// if it is a negative facing face the derivative is negative if it is less than 0.
 			// if it is a positive facing face the derivative has to be positive to grow and outward.
 
@@ -209,13 +205,8 @@ REAL lift_single_rect_bicycle(HyperRectangle* rect, REAL stepSize, REAL timeRema
 	// the nebWidth btw is stepSize * der
 	if (minNebCrossTime * 2 < stepSize)
 	{
-		//printf(": minNebCrossTime = %f, stepSize = %f\n", minNebCrossTime, stepSize);
-		//printf(": debugNumCalls = %i\n", debugNumCalls);
-
 		error_exit("minNebCrossTime is less than half of step size.");
 	}
-
-	//printf("\n");
 
 	////////////////////////////////////////
 	// lift each face by the minimum time //
@@ -279,13 +270,13 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 			break;
 		}
 
+		// this is primarily used in the plotting functions, so that we only plot the last iteration
 		if (settings->restartedComputation)
 		{
 			settings->restartedComputation();
         }
 
 		// This function gets the reachtime passed from the settings 
-		// In the case of the pendulum example it is 1.25*TimeToSafe
 		REAL timeRemaining = settings->reachTime;
 
 		// Get the initial set from which to perform reachability analysis.
@@ -294,17 +285,19 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		// Create a new hyperrectangle
 		HyperRectangle hull;
 
+		// I want to visualize an over-approximation of the over-all reachset too
+		HyperRectangle total_hull = trackedRect;
+
 		// compute reachability up to split time
 		while (safe && timeRemaining > 0)
 		{
-			// reachedAtIntermediateTime is a function that makes sure that the current state satisfies 
-			// the constraints. 
+			// reachedAtIntermediateTime is a function that checks the current hyper-rectangle against the safety specification,
+			// whatever that might be
 			if (settings->reachedAtIntermediateTime) 
 			{
 				hull = trackedRect;
             }
 			
-			// println(&trackedRect);
 			// debug changed so error tracker is always passed in (see note)
 			REAL timeElapsed = lift_single_rect_bicycle(&trackedRect, stepSize, timeRemaining, heading_input, throttle);
 
@@ -322,6 +315,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 			else if (settings->reachedAtIntermediateTime)
 			{
 				hyperrectangle_grow_to_convex_hull(&hull, &trackedRect);
+				hyperrectangle_grow_to_convex_hull(&total_hull, &trackedRect);
 
 				safe = safe && settings->reachedAtIntermediateTime(&hull);
 			}
@@ -330,7 +324,11 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				safe = safe && settings->reachedAtFinalTime(&trackedRect);
 
 			timeRemaining -= timeElapsed;
-		} // This is the end of this first while loop 
+
+		} // This is the end of this first while loop
+		  // This does the reachset computation for the reachtime
+		  // it continues until the simulation time is over, or we encounter an unsafe state,
+		  // whichever occurs first. 
 
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
@@ -346,20 +344,15 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
-				// println(&hull);
+				settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
 				rv = lastIterationSafe;
 				break;
 			}
 			if(!safe)
-				println(&hull);
-			//if (safe)
-			//{
-				// already safe with current step size, break
-				//DEBUG_PRINT("Found safe, stopping\n\r");
-				//rv = true;
-				//break;
-			//}
-		}
+				//printf("unsafe\n");
+				settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+				//println(&hull);
+		} 
 		else
 		{
 			// runtime was negative, split a fixed number of times

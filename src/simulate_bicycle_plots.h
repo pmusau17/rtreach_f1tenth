@@ -10,6 +10,9 @@
 #include "main.h"
 #include <stdbool.h>
 
+
+extern double maxTime;
+
 // simulate dynamics using Euler's method
 void simulate_bicycle_plots(REAL point[NUM_DIMS], REAL heading_input, REAL throttle,
 			  REAL stepSize,

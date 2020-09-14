@@ -6,12 +6,16 @@ set xlabel "x"
 set ylabel "y"
 
 # ranges for pendulum
-set xrange [-1.1:0.3]
-set yrange [0.0:1.0]
+set autoscale y
+set xrange [-3.0:3.0]
+set yrange [0.0:1.5]
+
+
 
 load "bicycle_initial.gnuplot.txt"
-load "bicycle_intermediate.gnuplot.txt"
 load "bicycle_final.gnuplot.txt"
+load "bicycle_intermediate.gnuplot.txt"
+
 
 plot "bicycle_simulation.dat" using 1:2 with point
 plot \

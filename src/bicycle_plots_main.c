@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "bicycle_model.h"
+#include "simulate_bicycle_plots.h"
 #include "util.h"
 
 int main(int argc, char** argv)
@@ -28,7 +29,8 @@ int main(int argc, char** argv)
 		}
         
         double reachTime = atof(argv[2]);
-        printf("Reach time is %f seconds\n", reachTime);
+		maxTime = reachTime;
+        printf("Reach time is %f seconds, simTime is %f seconds\n", reachTime,maxTime);
 
 		// setttings for pendulum
 		double startState[4] = {atof(argv[3]), atof(argv[4]), atof(argv[5]), atof(argv[6])};

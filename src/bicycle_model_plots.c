@@ -10,6 +10,7 @@ static FILE* f_intermediate;
 static FILE* f_final;
 
 
+double maxTime = 2.0;
 
 // declaration 
 bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
@@ -18,7 +19,6 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 {
 	bool rv = false;
-    REAL maxTime = 2.0f;
     // stop if the maximum simulation time 
 	if (simTime >= maxTime)
 	{
@@ -31,15 +31,7 @@ bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 	return rv;
 }
 
-// This function enumerates all of the corners of the current HyperRectangle and 
-// returns whether or not any of the points lies outside of the ellipsoid. The corner
-// Thing is only really helpful for linear models.
-bool finalState(HyperRectangle* rect)
-{
-	REAL maxPotential = 0.0;
 
-	return maxPotential > 1;
-}
 
 
 // Simulation 
@@ -105,7 +97,7 @@ void hyperrectangle_to_file(FILE* fout, HyperRectangle* r, int styleIndex)
 		{
 			"set label ' Init' at %f, %f point pointtype 3 lc rgb 'blue' tc rgb 'blue'",
 			"set obj rect from %f, %f to %f, %f fc rgbcolor 'dark-green' fs solid 0.2 \n",
-			"set obj rect from %f, %f to %f, %f fc rgbcolor 'red' fs solid 0.3 noborder\n",
+			"set obj rect from %f, %f to %f, %f fc rgbcolor 'red' fs solid 0.3\n",
 		};
 
 		fprintf(fout, styleStr[styleIndex], r->dims[X_DIM].min, r->dims[Y_DIM].min,
@@ -124,6 +116,16 @@ bool intermediateState(HyperRectangle* r)
 	hyperrectangle_to_file(f_intermediate, r,1);
 
 	return allowed;
+}
+
+// This function enumerates all of the corners of the current HyperRectangle and 
+// returns whether or not any of the points lies outside of the ellipsoid. The corner
+// Thing is only really helpful for linear models.
+bool finalState(HyperRectangle* rect)
+{
+	hyperrectangle_to_file(f_final, rect,2);;
+
+	return false;
 }
 
 
