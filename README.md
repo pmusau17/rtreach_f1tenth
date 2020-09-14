@@ -63,7 +63,7 @@ As we can see our initial computation identified a collision with a cone in the 
 We can visualize the results of the above example by executing the following: 
 
 ```
-$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot 
+$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model_visualization.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot
 ```
 
  and then: 

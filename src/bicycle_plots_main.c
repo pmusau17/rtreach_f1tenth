@@ -48,9 +48,10 @@ int main(int argc, char** argv)
     	printf("\n");
 		
     	// run reachability analysis test 
-    	bool safe = runReachability_bicycle(startState, reachTime, ms, milliseconds(),delta,u);
+    	HyperRectangle hull = runReachability_bicycle_vis(startState, reachTime, ms, milliseconds(),delta,u);
+		println(&hull);
 
-		printf("finished computation, result = %s\n", safe ? "safe" : "unsafe");
+		// printf("finished computation, result = %s\n", safe ? "safe" : "unsafe");
 	}
 
 	return rv;

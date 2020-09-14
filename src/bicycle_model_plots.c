@@ -12,8 +12,12 @@ static FILE* f_final;
 
 double maxTime = 2.0;
 
-// declaration 
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+// do face lifting with the given settings, iteratively improving the computation
+// returns true if the reachable set of states is satisfactory according to the
+// function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
+// returns the convex hull of the reachset
+
+HyperRectangle face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
 
 // function that stops simulation after two seconds
 bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
@@ -131,7 +135,7 @@ bool finalState(HyperRectangle* rect)
 
 
 // reachability analysis
-bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
+HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
 	printf("Starting reachability computation from the following state:\n");
