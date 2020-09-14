@@ -17,7 +17,7 @@ double maxTime = 2.0;
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
 // returns the convex hull of the reachset
 
-HyperRectangle face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 
 // function that stops simulation after two seconds
 bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
@@ -138,12 +138,10 @@ bool finalState(HyperRectangle* rect)
 HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
-	printf("Starting reachability computation from the following state:\n");
 	for (int d = 0; d < NUM_DIMS; ++d)
 	{
 		set.init.dims[d].min = start[d];
 		set.init.dims[d].max = start[d];
-		printf("[%f,%f]\n",set.init.dims[d].min,set.init.dims[d].max);
 	}
 
 	set.reachTime = simTime;
@@ -151,10 +149,6 @@ HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallT
 
 	REAL iss = set.reachTime;
 	iss = iss * 0.10f;
-
-	DEBUG_PRINT("\n\rsimTime: %f\n\rreachTime: %f\n\r\n\r", simTime, set.reachTime);
-	
-	
 
 	set.initialStepSize = iss; //set.reachTime / 10.0f;
 	set.maxRectWidthBeforeError = 100;
@@ -166,9 +160,6 @@ HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallT
     open_files(true);
 	hyperrectangle_to_file(f_initial, &set.init, 0);
 
-	// debugging for patrick
-	printf("Beginning Reachability Analysis >>>> initialStepSize: %f, reachTime: %f\n\n",set.initialStepSize,set.reachTime);
-
-	return face_lifting_iterative_improvement_bicycle(startMs, &set,heading_input, throttle);
+	return face_lifting_iterative_improvement_bicycle_vis(startMs, &set,heading_input, throttle,true);
 }
 

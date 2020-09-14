@@ -64,7 +64,8 @@ int main( int argc, const char* argv[] )
 	load_wallpoints(filepath,true);
     
     // run reachability analysis test 
-    bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
+    // bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
+	bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
 	//int runtimeMs = 20; // run for 20 milliseconds
 
 	// return value: 0 = unsafe by all, 1 = safe by simulation, 2 = safe by reachability

@@ -22,7 +22,9 @@ double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635,
 // returns true if the reachable set of states is satisfactory according to the
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
 
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+// visualization version, returns convex hull
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
+
 
 // helper function to check safety
 bool check_safety(HyperRectangle* rect, REAL (*cone)[2]);
@@ -110,9 +112,8 @@ bool finalState(HyperRectangle* rect)
 }
 
 
-
-
-bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
+// reachability analysis
+HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
 	for (int d = 0; d < NUM_DIMS; ++d)
@@ -127,18 +128,12 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
 	REAL iss = set.reachTime;
 	iss = iss * 0.10f;
 
-	
-	
-
-	set.initialStepSize = iss; 
+	set.initialStepSize = iss; //set.reachTime / 10.0f;
 	set.maxRectWidthBeforeError = 100;
 
 	set.reachedAtFinalTime = finalState;
 	set.reachedAtIntermediateTime = intermediateState;
-	set.restartedComputation = 0; //restartedComputation;
+    set.restartedComputation = 0; 
 
-	return face_lifting_iterative_improvement_bicycle(startMs, &set,heading_input, throttle);
+	return face_lifting_iterative_improvement_bicycle_vis(startMs, &set,heading_input, throttle,false);
 }
-
-
-

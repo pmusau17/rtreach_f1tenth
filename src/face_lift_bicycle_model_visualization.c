@@ -18,7 +18,7 @@
 // returns true if the reachable set of states is satisfactory according to the
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
 // returns the convex hull of the reachset
-HyperRectangle face_lifting_iterative_improvement_bicycle_(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 REAL get_derivative_bounds_bicycle(HyperRectangle* rect, int faceIndex,REAL heading_input, REAL throttle);
 
 
@@ -242,7 +242,7 @@ REAL lift_single_rect_bicycle(HyperRectangle* rect, REAL stepSize, REAL timeRema
 }
 
 
-HyperRectangle face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings,REAL heading_input, REAL throttle)
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings,REAL heading_input, REAL throttle,bool plot)
 {
 	bool rv = false;
 	bool lastIterationSafe = false;
@@ -346,13 +346,20 @@ HyperRectangle face_lifting_iterative_improvement_bicycle(int startMs, LiftingSe
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
-				settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                if(plot)
+                {
+                    settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                }
+				    
 				rv = lastIterationSafe;
 				break;
 			}
 			if(!safe)
 				//printf("unsafe\n");
-				settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                if(plot)
+                {
+                    settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                }
 				//println(&hull);
 		} 
 		else
