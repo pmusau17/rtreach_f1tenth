@@ -172,7 +172,7 @@ The neural network inspired controller that we use in our experiments maps image
 Run the safety monitor + safety_controller + neural network controller. 
 
 ```
-$ rosrun rtreach reach_node_sync porto_obstacles.txt
+$ rosrun rtreach reach_node porto_obstacles.txt
 ```
 In this setup the decision manager will allow the neural network model to control the vehicle so long as the control command issue will not cause the vehicle to enter an unsafe state in the next one second. Otherwise the safety controller will be used. The decision manager can then return to the neural network controller provided that the car has been in a safe operating mode for 20 control steps. 
 

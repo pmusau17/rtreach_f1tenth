@@ -101,7 +101,11 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   hull = runReachability_bicycle_vis(state, sim_time, walltime, ms, delta, u);
   println(&hull);
 
-
+  
+  hull.dims[0].min = hull.dims[0].min  - 0.25;
+  hull.dims[0].max = hull.dims[0].max  + 0.25;
+  hull.dims[1].min = hull.dims[1].min  - 0.15;
+  hull.dims[1].max = hull.dims[1].max  + 0.15;
   // publish marker
 
   visualization_msgs::Marker marker;
