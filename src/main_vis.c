@@ -64,10 +64,10 @@ int main( int argc, const char* argv[] )
 	load_wallpoints(filepath,true);
     
     // run reachability analysis test 
-	bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
-	//int runtimeMs = 20; // run for 20 milliseconds
+	HyperRectangle reach_hull = runReachability_bicycle_vis(startState, timeToSafe, runtimeMs, startMs,delta,u);
 
-	DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
+    // print the hull 
+	println(&reach_hull);
 	deallocate_2darr(file_rows,file_columns);
 
 

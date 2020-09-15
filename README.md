@@ -91,13 +91,14 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
-$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm 
+gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
 ```
 
 Next create a shared library:
 
 ```
 $ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
+$ gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o
 ```
 
 This will create a file called **libRtreach.so**. 
@@ -145,7 +146,7 @@ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 Copy the rtreach shared library into the package:
 
 ```
-cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
+cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
 ```
 Build the ros-package.
 ```
