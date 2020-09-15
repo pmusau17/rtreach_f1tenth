@@ -91,7 +91,7 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
-gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
+$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
 ```
 
 Next create a shared library:
@@ -133,29 +133,29 @@ The platform that we seek to use these techniques on is a 1/10 scale autonomous 
 Once that is installed, create the ros package: 
 
 ```
- cd ..
- mkdir -p ../rtreach_ros/src
+$ cd ..
+$ mkdir -p ../rtreach_ros/src
 ```
 
 Create the ros-nodes into the package created above:
 
 ```
-cp -r ros_src/rtreach/ ../rtreach_ros/src/
+$ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 ```
 
 Copy the rtreach shared library into the package:
 
 ```
-cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
+$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
 ```
 Build the ros-package.
 ```
-cd ../rtreach_ros && catkin_make
+$ cd ../rtreach_ros && catkin_make
 ```
 and then: 
 
 ```
-source devel/setup.bash
+$ source devel/setup.bash
 ```
 
 ### Running Rtreach
@@ -163,7 +163,7 @@ source devel/setup.bash
 Start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle.
 
 ```
-roslaunch race rtreach.launch 
+$ roslaunch race rtreach.launch 
 ```
 
 The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8. The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
@@ -172,12 +172,22 @@ The neural network inspired controller that we use in our experiments maps image
 Run the safety monitor + safety_controller + neural network controller. 
 
 ```
-rosrun rtreach reach_node_sync porto_obstacles.txt
+$ rosrun rtreach reach_node_sync porto_obstacles.txt
 ```
 In this setup the decision manager will allow the neural network model to control the vehicle so long as the control command issue will not cause the vehicle to enter an unsafe state in the next one second. Otherwise the safety controller will be used. The decision manager can then return to the neural network controller provided that the car has been in a safe operating mode for 20 control steps. 
 
 
 To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
+
+## Visualizing the Reachable Set
+
+You can visualize the reachable set (convex hull) by running the following: 
+
+```
+$ rosrun rtreach visualize_node porto_obstacles.txt
+```
+
+![REACH_HULL](images/reach_hull.gif)
 
 ## Repository Organization
 

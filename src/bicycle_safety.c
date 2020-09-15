@@ -140,7 +140,7 @@ bool check_safety_wall(HyperRectangle* rect)
         safe = check_safety(rect,point);
         if(!safe)
         {
-            printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
+            // printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
             break;
         }
     }
