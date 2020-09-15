@@ -170,7 +170,7 @@ Start the simulation. This will bring up the track displayed at the start of thi
 $ roslaunch race rtreach.launch 
 ```
 
-The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8. The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
+The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8). The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
 
 
 Run the safety monitor + safety_controller + neural network controller. 
