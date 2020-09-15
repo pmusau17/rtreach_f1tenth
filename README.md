@@ -82,6 +82,10 @@ Usage of plotting utilities:
 $ ./bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
 ```
 
+![Block Diagram](images/rtreach.png)
+
+In the above image, the green rectangles are the intermediate reachable sets encountered after each face-lifting operation, and the red rectangle is the convex hull of these rectangles.
+
 ### Building rtreach as a C library. 
 
 Now that you have a taste of what rtreach is, we can move on to the more fun part. Using rtreach within ROS. By doing this, we can implement a safety monitor using the archtichture displayed again below: 
