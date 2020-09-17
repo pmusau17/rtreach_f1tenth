@@ -73,7 +73,7 @@ int main( int argc, const char* argv[] )
 
 	DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 	deallocate_2darr(file_rows,file_columns);
-	deallocate_obstacles(num_obstacles);
+	deallocate_obstacles(obstacle_count);
 
 	return 0;
 }

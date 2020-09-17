@@ -27,6 +27,8 @@ extern "C"
      void load_wallpoints(const char * filename, bool print);
      HyperRectangle hull;
      void println(HyperRectangle * r);
+     void allocate_obstacles(int num_obstacles,double (*points)[2]);
+     void deallocate_obstacles(int num_obstacles);
 }
 
 
@@ -39,11 +41,13 @@ extern "C"
 
 ros::Publisher ackermann_pub; 
 ros::Publisher vis_pub;
+ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
 const double sim_time = 1.0;
 double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
+int markers_allocated = 0;
 
 
 
@@ -95,44 +99,71 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
   // create the ros message that will be sent to the VESC
 
+  if(markers_allocated>0)
+  {
+    ackermann_msgs::AckermannDriveStamped ack_msg;
+    
+    hull = runReachability_bicycle_vis(state, sim_time, walltime, ms, delta, u);
+    println(&hull);
 
-  ackermann_msgs::AckermannDriveStamped ack_msg;
-  
-  hull = runReachability_bicycle_vis(state, sim_time, walltime, ms, delta, u);
-  println(&hull);
+    
+    hull.dims[0].min = hull.dims[0].min  - 0.25;
+    hull.dims[0].max = hull.dims[0].max  + 0.25;
+    hull.dims[1].min = hull.dims[1].min  - 0.15;
+    hull.dims[1].max = hull.dims[1].max  + 0.15;
+    // publish marker
 
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "map";
+    //marker.ns = "my_namespace";
+    marker.header.stamp = ros::Time();
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::CUBE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
+    marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
+    marker.pose.position.z = 0.0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
+    marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
+    marker.scale.z = 0.1;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    //only if using a MESH_RESOURCE marker type:
+    vis_pub.publish( marker );
+  }
   
-  hull.dims[0].min = hull.dims[0].min  - 0.25;
-  hull.dims[0].max = hull.dims[0].max  + 0.25;
-  hull.dims[1].min = hull.dims[1].min  - 0.15;
-  hull.dims[1].max = hull.dims[1].max  + 0.15;
-  // publish marker
+}
 
-  visualization_msgs::Marker marker;
-  marker.header.frame_id = "map";
-  //marker.ns = "my_namespace";
-  marker.header.stamp = ros::Time();
-  marker.id = 0;
-  marker.type = visualization_msgs::Marker::CUBE;
-  marker.action = visualization_msgs::Marker::ADD;
-  marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
-  marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
-  marker.pose.position.z = 0.0;
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.z = 0.0;
-  marker.pose.orientation.w = 1.0;
-  marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
-  marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
-  marker.scale.z = 0.1;
-  marker.color.a = 1.0; // Don't forget to set the alpha!
-  marker.color.r = 0.0;
-  marker.color.g = 1.0;
-  marker.color.b = 0.0;
-  //only if using a MESH_RESOURCE marker type:
-  vis_pub.publish( marker );
-  
-  
+void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_msg)
+{
+
+     
+    std::vector<visualization_msgs::Marker> markers = marker_msg->markers;
+    int num_obstacles = markers.size();
+    double points[num_obstacles][2]; 
+    int i;
+    for (i = 0; i< num_obstacles;i++)
+    {
+      points[i][0] = markers.at(i).pose.position.x;
+      points[i][1] = markers.at(i).pose.position.y;
+    }
+
+    if(markers_allocated<1)
+    {
+      allocate_obstacles(num_obstacles,points);
+      markers_allocated+=1;
+    }
+    else
+    {
+      sub.shutdown();
+    }
+    std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
 }
 
 
@@ -175,7 +206,7 @@ int main(int argc, char **argv)
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
     vis_pub = n.advertise<visualization_msgs::Marker>( "reach_hull", 5 );
   
-
+    sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
 
     typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
@@ -190,6 +221,7 @@ int main(int argc, char **argv)
 
     // delete the memory allocated to store the wall points
     deallocate_2darr(file_rows,file_columns);
+    deallocate_obstacles(obstacle_count);
 
 
     return 0; 

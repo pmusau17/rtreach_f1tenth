@@ -11,6 +11,8 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <ros/package.h>
 #include <ros/console.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
 
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
@@ -20,10 +22,11 @@
 extern "C"
 { 
      #include "bicycle_safety.h"
-     double getSimulatedSafeTime(double start[4],double heading_input,double throttle);
      bool runReachability_bicycle(double * start, double  simTime, double  wallTimeMs, double  startMs,double  heading_input, double  throttle);
      void deallocate_2darr(int rows,int columns);
      void load_wallpoints(const char * filename, bool print);
+     void allocate_obstacles(int num_obstacles,double (*points)[2]);
+     void deallocate_obstacles(int num_obstacles);
 }
 
 
@@ -34,13 +37,15 @@ extern "C"
 */
 
 
-ros::Publisher ackermann_pub; 
+ros::Publisher ackermann_pub; // control command publisher
+ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
 const double sim_time = 1.0;
 double ms = 0.0; // this is redundant will remove in refactoring
 const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
 
+int markers_allocated = 0;
 bool stop = false;
 int safePeriods =0;
 
@@ -90,46 +95,73 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
   // create the ros message that will be sent to the VESC
 
-
-  ackermann_msgs::AckermannDriveStamped ack_msg;
+  if(markers_allocated>0)
+  {
+    ackermann_msgs::AckermannDriveStamped ack_msg;
+    
   
- 
-  if(stop && safePeriods>20)
-  {
-    stop = false;
-  }
+    if(stop && safePeriods>20)
+    {
+      stop = false;
+    }
 
-  safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
-  if (safe_to_continue && !stop)
-  {
-      ack_msg.drive.steering_angle = delta;
-      ack_msg.drive.speed = u;
-      ack_msg.header.stamp = ros::Time::now();
-      ackermann_pub.publish(ack_msg);
-  }
-      
-  else
-  {
-      cout << "safe: angle: " << safety_msg->drive.steering_angle << " safe speed: " << safety_msg->drive.speed << endl;
-      ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
-      ack_msg.drive.speed = safety_msg->drive.speed;
-      ack_msg.header.stamp = ros::Time::now();
-      ackermann_pub.publish(ack_msg);
-      ROS_WARN("using safety controller.");
-      cout << "using safety controller...safe?: " << safe_to_continue << endl; 
-      stop = true;
-  }
+    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+    if (safe_to_continue && !stop)
+    {
+        ack_msg.drive.steering_angle = delta;
+        ack_msg.drive.speed = u;
+        ack_msg.header.stamp = ros::Time::now();
+        ackermann_pub.publish(ack_msg);
+    }
+        
+    else
+    {
+        cout << "safe: angle: " << safety_msg->drive.steering_angle << " safe speed: " << safety_msg->drive.speed << endl;
+        ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
+        ack_msg.drive.speed = safety_msg->drive.speed;
+        ack_msg.header.stamp = ros::Time::now();
+        ackermann_pub.publish(ack_msg);
+        ROS_WARN("using safety controller.");
+        cout << "using safety controller...safe?: " << safe_to_continue << endl; 
+        stop = true;
+    }
 
-  if(stop & safe_to_continue)
-  {
-    safePeriods+=1;
-  }
-  else
-  {
-    safePeriods = 0;
+    if(stop & safe_to_continue)
+    {
+      safePeriods+=1;
+    }
+    else
+    {
+      safePeriods = 0;
+    }
   }
   
-  
+}
+
+void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_msg)
+{
+
+     
+    std::vector<visualization_msgs::Marker> markers = marker_msg->markers;
+    int num_obstacles = markers.size();
+    double points[num_obstacles][2]; 
+    int i;
+    for (i = 0; i< num_obstacles;i++)
+    {
+      points[i][0] = markers.at(i).pose.position.x;
+      points[i][1] = markers.at(i).pose.position.y;
+    }
+
+    if(markers_allocated<1)
+    {
+      allocate_obstacles(num_obstacles,points);
+      markers_allocated+=1;
+    }
+    else
+    {
+      sub.shutdown();
+    }
+    std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
 }
 
 
@@ -171,6 +203,7 @@ int main(int argc, char **argv)
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
   
+    sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
 
 
     typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
@@ -186,6 +219,7 @@ int main(int argc, char **argv)
 
     // delete the memory allocated to store the wall points
     deallocate_2darr(file_rows,file_columns);
+    deallocate_obstacles(obstacle_count);
 
 
     return 0; 
