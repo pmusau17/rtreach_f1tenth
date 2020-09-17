@@ -54,6 +54,10 @@ int main( int argc, const char* argv[] )
     getSimulatedSafeTime(startState,delta,u);
     printf("\n");
 
+	// location of obstacles in our scenario
+	int num_obstacles = 5;
+	double points[5][2] = {{2.0,2.0},{4.7,2.7},{11.36,-1.46},{3.0,6.4},{-9.64,2.96}};
+	allocate_obstacles(num_obstacles,points);
     // simTime 
     REAL timeToSafe = 2.0;
 
@@ -69,7 +73,7 @@ int main( int argc, const char* argv[] )
 
 	DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 	deallocate_2darr(file_rows,file_columns);
-
+	deallocate_obstacles(num_obstacles);
 
 	return 0;
 }
