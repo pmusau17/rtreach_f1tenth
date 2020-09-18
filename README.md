@@ -183,6 +183,22 @@ In this setup the decision manager will allow the neural network model to contro
 
 To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
 
+Arguments that can be provided to the [rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch): 
+- world_name: gazebo world file used to generate environment.
+- model_name: network .hdf5 keras model file. 
+- csv_filename: waypoint file used by pure pursuit algorithm.
+- lec_only: flag that limits experiment to LEC only control.
+- map_file: occupancy grid for corresponding world name. 
+- random_seed: random seed used to allocte obstacles within vehicle environment.
+- freespace_file: free space points within occupancy grid this file is generate by [gen_map.py](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/scripts/gen_map.py)
+- timeout: how long to run each experiment before timeout.
+
+Example specification of argument parameter: **argument_name:=value** 
+
+```
+$ roslaunch race rtreach.launch timeout:=10 
+```
+
 ## Visualizing the Reachable Set
 
 You can visualize the reachable set (convex hull) by running the following: 
