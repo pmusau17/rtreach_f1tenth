@@ -147,6 +147,9 @@ Create the ros-nodes into the package created above:
 $ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 ```
 
+```
+$ cp run_batch.sh ../rtreach_ros
+```
 Copy the rtreach shared library into the package:
 
 ```
@@ -164,7 +167,14 @@ $ source devel/setup.bash
 
 ### Running Rtreach
 
-Start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle.
+In the Platooning-F1Tenth ros package execute the following: 
+
+```
+$ source devel/setup.bash
+```
+
+
+Then start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle. 
 
 ```
 $ roslaunch race rtreach.launch 
@@ -208,6 +218,17 @@ $ rosrun rtreach visualize_node porto_obstacles.txt
 ```
 
 ![REACH_HULL](images/reach_hull.gif)
+
+
+## Run a Series of Experiments
+
+One of the things that may be useful to do is to run a series of simulations with a diverse number of obstacle placements for a given track. Then one can monitor how effective the safety controller under consideration is. We have made this functionality available. The bash script [run_batch.sh](run_batch.sh) performs several experiments with a timeout of 30 seconds and  randomly places obstacles within the racetrack.
+
+To use the script first source both the rtreach and Platooning-F1Tenth packages and then run the bash file:
+
+```
+./run_batch
+```
 
 ## Repository Organization
 
