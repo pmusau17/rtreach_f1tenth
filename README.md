@@ -230,6 +230,8 @@ To use the script first source both the rtreach and Platooning-F1Tenth packages 
 ./run_batch
 ```
 
+If a collision occurs during any of the experiments it will be logged along with the random_seed, and number of obstacles so that the scenario can be re-produced. The logs can be found in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/logs).
+
 ## Repository Organization
 
 **ros_src/rtreach:** ros-package containing rtreach implementation.
