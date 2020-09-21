@@ -50,12 +50,6 @@ int main(int argc, char** argv)
     	// run reachability analysis test 
     	HyperRectangle hull = runReachability_bicycle_vis(startState, reachTime, ms, milliseconds(),delta,u);
 		println(&hull);
-
-		printf("\n");
-    	printf("num VisStates: %d\n",num_intermediate);
-    	printf("total encountered intermediate: %d\n",total_intermediate);
-   		println(&VisStates[num_intermediate-2]);
-    	println(&VisStates[num_intermediate-1]);
 	}
 
 	return rv;
