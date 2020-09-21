@@ -5,7 +5,6 @@
 #ifndef SIMULATE_H_
 #define SIMULATE_H_
 
-#include "dynamics_bicycle_model.h"
 #include "geometry.h"
 #include "main.h"
 #include <stdbool.h>

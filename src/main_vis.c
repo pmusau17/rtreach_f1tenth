@@ -76,8 +76,13 @@ int main( int argc, const char* argv[] )
 	printf("\n");
     printf("num VisStates: %d\n",num_intermediate);
     printf("total encountered intermediate: %d\n",total_intermediate);
-    println(&VisStates[num_intermediate-2]);
-    println(&VisStates[num_intermediate-1]);
+    // println(&VisStates[num_intermediate-2]);
+    // println(&VisStates[num_intermediate-1]);
+
+	for (int i =0; i < num_intermediate; i+=2)
+	{
+		println(&VisStates[i]);
+    }
 
     // print the hull 
 	println(&reach_hull);

@@ -13,10 +13,6 @@
 // the car is 0.5 m long in the x direction 
 // 0.3 long in the y direction
 
-// cones in the scenario we are considering, I'll get rid of these eventually
-/*double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635, 2.765}},
-						{{11.295, 11.425},{-1.525, -1.395}},{{2.935, 3.065},{6.335, 6.465}},{{-9.705, -9.575},{2.895, 3.025}}};*/
-
 // do face lifting with the given settings, iteratively improving the computation
 // returns true if the reachable set of states is satisfactory according to the
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
