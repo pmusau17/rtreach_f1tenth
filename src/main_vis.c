@@ -17,6 +17,7 @@
 #include "main.h"
 #include "bicycle_model.h"
 #include "bicycle_safety.h"
+#include "simulate_bicycle_plots.h"
 
 const int state_n = 4; // state dimension
 
@@ -50,10 +51,7 @@ int main( int argc, const char* argv[] )
 
     REAL delta = control_input[1];
     REAL u = control_input[0];
-    // simulate the car with a constant input passed from the command line
-    getSimulatedSafeTime(startState,delta,u);
-    printf("\n");
-
+   
     // simTime 
     REAL timeToSafe = 2.0;
 
@@ -66,6 +64,12 @@ int main( int argc, const char* argv[] )
     // run reachability analysis test 
 	HyperRectangle reach_hull = runReachability_bicycle_vis(startState, timeToSafe, runtimeMs, startMs,delta,u);
 
+	printf("\n");
+    printf("num VisStates: %d\n",num_intermediate);
+    printf("total encountered intermediate: %d\n",total_intermediate);
+    println(&VisStates[num_intermediate-2]);
+    println(&VisStates[num_intermediate-1]);
+	
     // print the hull 
 	println(&reach_hull);
 	deallocate_2darr(file_rows,file_columns);

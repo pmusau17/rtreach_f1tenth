@@ -10,6 +10,7 @@ static FILE* f_intermediate;
 static FILE* f_final;
 
 
+// global variable definitions 
 double maxTime = 2.0;
 
 // do face lifting with the given settings, iteratively improving the computation
@@ -86,6 +87,11 @@ void restartedComputation()
 	// close and open the files to clear them
 	close_files(false);
 	open_files(false);
+
+	// reset the counter of intermediate states 
+	num_intermediate = 0;
+	total_intermediate = 0;
+	final_hull = false;
 }
 
 // styleIndex: 0 = init, 1 = intermediate, 2 = final
@@ -115,11 +121,18 @@ void hyperrectangle_to_file(FILE* fout, HyperRectangle* r, int styleIndex)
 // during the reachset computation
 bool intermediateState(HyperRectangle* r)
 {
-	bool allowed = true;
 
 	hyperrectangle_to_file(f_intermediate, r,1);
+	
+	// add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE)
+	{
+		VisStates[num_intermediate] = *r;
+		num_intermediate++;
+	}	
+	total_intermediate++;
 
-	return allowed;
+	return true;
 }
 
 // This function enumerates all of the corners of the current HyperRectangle and 
@@ -127,7 +140,15 @@ bool intermediateState(HyperRectangle* r)
 // Thing is only really helpful for linear models.
 bool finalState(HyperRectangle* rect)
 {
-	hyperrectangle_to_file(f_final, rect,2);;
+	hyperrectangle_to_file(f_final, rect,2);
+	// final state to array if space permits add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE && !final_hull)
+	{
+		VisStates[num_intermediate] = *rect;
+		num_intermediate++;
+	}
+	final_hull = true;
+	total_intermediate++;
 
 	return false;
 }

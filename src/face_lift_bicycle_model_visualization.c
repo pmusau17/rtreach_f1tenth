@@ -11,7 +11,7 @@
 #include "main.h"
 #include "face_lift.h"
 #include "util.h"
-
+#include "simulate_bicycle_plots.h"
 
 
 // do face lifting with the given settings, iteratively improving the computation
@@ -21,6 +21,12 @@
 HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 REAL get_derivative_bounds_bicycle(HyperRectangle* rect, int faceIndex,REAL heading_input, REAL throttle);
 
+
+// Global Variable Declarations
+struct HyperRectangle VisStates[MAX_INTERMEDIATE];
+bool final_hull = false;
+int total_intermediate = 0;
+int num_intermediate = 0;
 
 
 // Constants necessary to guarantee loop termination.
