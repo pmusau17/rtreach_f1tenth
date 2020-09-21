@@ -34,7 +34,7 @@ int main( int argc, const char* argv[] )
 
 	DEBUG_PRINT("Argc: %d\n\r", argc);
 
-	if (argc < 6) {
+	if (argc < 8) {
 		printf("Error: not enough input arguments!\n\r");
 		return 0;
 	}
@@ -44,12 +44,14 @@ int main( int argc, const char* argv[] )
 		startState[1] = atof(argv[3]);
 		startState[2] = atof(argv[4]);
 		startState[3] = atof(argv[5]);
+		printf("%f\n",startState[0]);
         control_input[0] = atof(argv[6]);
         control_input[1] = atof(argv[7]);
 		DEBUG_PRINT("runtime: %d ms\n\rx_0[0]: %f\n\rx_0[1]: %f\n\rx_0[2]: %f\n\rx_0[3]: %f\n\ru_0[0]: %f\n\ru_0[1]: %f\n\r\n", runtimeMs, startState[0], startState[1], startState[2], startState[3],control_input[0],control_input[1]);
 	}
 
-    REAL delta = control_input[1];
+    
+	REAL delta = control_input[1];
     REAL u = control_input[0];
    
     // simTime 
@@ -61,6 +63,13 @@ int main( int argc, const char* argv[] )
 	// load the wall points into the global variable
 	load_wallpoints(filepath,true);
     
+	// location of obstacles in our scenario
+	int num_obstacles = 5;
+	double points[5][2] = {{2.0,2.0},{4.7,2.7},{11.36,-1.46},{3.0,6.4},{-9.64,2.96}};
+	allocate_obstacles(num_obstacles,points);
+
+	printf("offending cone (%f,%f) (%f, %f)\n",obstacles[0][0][0],obstacles[0][0][1],obstacles[0][1][0],obstacles[0][1][1]);
+
     // run reachability analysis test 
 	HyperRectangle reach_hull = runReachability_bicycle_vis(startState, timeToSafe, runtimeMs, startMs,delta,u);
 
@@ -69,10 +78,11 @@ int main( int argc, const char* argv[] )
     printf("total encountered intermediate: %d\n",total_intermediate);
     println(&VisStates[num_intermediate-2]);
     println(&VisStates[num_intermediate-1]);
-	
+
     // print the hull 
 	println(&reach_hull);
 	deallocate_2darr(file_rows,file_columns);
+	deallocate_obstacles(obstacle_count);
 
 
 	return 0;

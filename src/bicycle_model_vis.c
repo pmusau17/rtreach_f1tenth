@@ -14,8 +14,8 @@
 // 0.3 long in the y direction
 
 // cones in the scenario we are considering, I'll get rid of these eventually
-double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635, 2.765}},
-						{{11.295, 11.425},{-1.525, -1.395}},{{2.935, 3.065},{6.335, 6.465}},{{-9.705, -9.575},{2.895, 3.025}}};
+/*double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635, 2.765}},
+						{{11.295, 11.425},{-1.525, -1.395}},{{2.935, 3.065},{6.335, 6.465}},{{-9.705, -9.575},{2.895, 3.025}}};*/
 
 // do face lifting with the given settings, iteratively improving the computation
 // returns true if the reachable set of states is satisfactory according to the
@@ -23,10 +23,6 @@ double cones[5][2][2] = {{{1.935, 2.065},{1.935, 2.065}},{{4.635, 4.765},{2.635,
 
 // visualization version, returns convex hull
 HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
-
-
-// helper function to check safety
-bool check_safety(HyperRectangle* rect, REAL (*cone)[2]);
 
 
 // function that stops simulation after two seconds
@@ -68,6 +64,7 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[1].min = r->dims[1].min  - 0.15;
 	r->dims[1].max = r->dims[1].max  + 0.15;
 
+	
 	// copy intermediate state into array
 	// add state to array for plotting
 	if(num_intermediate < MAX_INTERMEDIATE)
@@ -77,18 +74,8 @@ bool intermediateState(HyperRectangle* r)
 	}	
 	total_intermediate++;
 
-	// loop through the cones
-	for (int j = 0; j < 5; j++)
-	{
-		allowed = check_safety(r,cones[j]);
-		if(!allowed)
-        {
-            printf("offending cone (%f,%f) (%f, %f)\n",cones[j][0][0],cones[j][0][1],cones[j][1][0],cones[j][1][1]);
-            break;
-        }
-		
-	}
-
+	allowed = check_safety_obstacles(r);
+	
 	if(allowed)
 	{
 		allowed = check_safety_wall(r);
