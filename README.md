@@ -211,10 +211,16 @@ $ roslaunch race rtreach.launch timeout:=10
 
 ## Visualizing the Reachable Set
 
-You can visualize the reachable set (convex hull) by running the following: 
+You can visualize the reachable set by running the following: 
 
 ```
-$ rosrun rtreach visualize_node porto_obstacles.txt
+$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 80
+```
+
+Usage: 
+
+```
+$ rosrun rtreach visualize_node (file containing obstacle locations) (boolean for bloating of reachset) (reachset time horizon) (reachability wall time)
 ```
 
 ![REACH_HULL](images/reach_hull.gif)

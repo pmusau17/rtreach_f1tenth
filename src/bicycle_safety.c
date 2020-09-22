@@ -146,7 +146,7 @@ bool check_safety_obstacles(HyperRectangle* rect)
         allowed= check_safety(rect,obs);
         if(!allowed)
         {   
-            printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
+            // printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
             break;
         }
 	}

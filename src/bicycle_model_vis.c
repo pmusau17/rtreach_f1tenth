@@ -85,8 +85,8 @@ bool intermediateState(HyperRectangle* r)
 	}	
 	total_intermediate++;
 
-	if(!allowed)
-		printf("unsafe....\n");
+	//if(!allowed)
+		// printf("unsafe....\n");
 	return allowed;
 }
 
