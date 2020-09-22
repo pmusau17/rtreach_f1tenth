@@ -100,7 +100,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     ackermann_msgs::AckermannDriveStamped ack_msg;
     
   
-    if(stop && safePeriods>20)
+    if(stop && safePeriods>30)
     {
       stop = false;
     }

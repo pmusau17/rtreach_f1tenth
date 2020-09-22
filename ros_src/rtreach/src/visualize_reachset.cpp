@@ -141,7 +141,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       marker.color.r = (double) rand() / (RAND_MAX);
       marker.color.g = (double) rand() / (RAND_MAX);
       marker.color.b = (double) rand() / (RAND_MAX);
-      //marker.lifetime =ros::Duration(0); 
+      marker.lifetime =ros::Duration(0.1); 
       ma.markers.push_back(marker);
     }
 
