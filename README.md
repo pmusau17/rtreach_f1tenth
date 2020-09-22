@@ -153,7 +153,7 @@ $ cp run_batch.sh ../rtreach_ros
 Copy the rtreach shared library into the package:
 
 ```
-$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
+$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
 ```
 Build the ros-package.
 ```

@@ -22,6 +22,7 @@
 extern "C"
 { 
      #include "bicycle_safety.h"
+     #include "simulate_bicycle_plots.h"
      HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle);
      void deallocate_2darr(int rows,int columns);
      void load_wallpoints(const char * filename, bool print);
@@ -46,7 +47,7 @@ ros::Subscriber sub; // markerArray subscriber
 // reachability parameters
 const double sim_time = 1.0;
 double ms = 0.0; // this is redundant will remove in refactoring
-const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
+const double walltime = 10; // this in ms apparently wtf the declaration doesn't say that 
 int markers_allocated = 0;
 
 
@@ -104,38 +105,50 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     ackermann_msgs::AckermannDriveStamped ack_msg;
     
     hull = runReachability_bicycle_vis(state, sim_time, walltime, ms, delta, u);
-    println(&hull);
+    // println(&hull);
+    printf("num_boxes: %d, ",num_intermediate);
+    visualization_msgs::MarkerArray ma;
+    for(int i = 0; i<num_intermediate;i++)
+    {
+      hull = VisStates[i];
+      //println(&hull);
+      hull.dims[0].min = hull.dims[0].min  - 0.25;
+      hull.dims[0].max = hull.dims[0].max  + 0.25;
+      hull.dims[1].min = hull.dims[1].min  - 0.15;
+      hull.dims[1].max = hull.dims[1].max  + 0.15;
+      // publish marker
 
-    
-    hull.dims[0].min = hull.dims[0].min  - 0.25;
-    hull.dims[0].max = hull.dims[0].max  + 0.25;
-    hull.dims[1].min = hull.dims[1].min  - 0.15;
-    hull.dims[1].max = hull.dims[1].max  + 0.15;
-    // publish marker
+      // println(&hull);
+      visualization_msgs::Marker marker;
+      marker.header.frame_id = "/map";
+      //marker.ns = "my_namespace";
+      marker.header.stamp = ros::Time::now();
+      marker.id = i;
+      marker.type = visualization_msgs::Marker::CUBE;
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
+      marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
+      
+      marker.pose.position.z = 0.0;
+      marker.pose.orientation.x = 0.0;
+      marker.pose.orientation.y = 0.0;
+      marker.pose.orientation.z = 0.0;
+      marker.pose.orientation.w = 1.0;
+      marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
+      marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
+      marker.scale.z = 0.05;
+      marker.color.a = 1.0; // Don't forget to set the alpha!
+      marker.color.r = (double) rand() / (RAND_MAX);
+      marker.color.g = (double) rand() / (RAND_MAX);
+      marker.color.b = (double) rand() / (RAND_MAX);
+      marker.lifetime =ros::Duration(1); 
+      //only if using a MESH_RESOURCE marker type:
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = "map";
-    //marker.ns = "my_namespace";
-    marker.header.stamp = ros::Time();
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::CUBE;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
-    marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
-    marker.pose.position.z = 0.0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
-    marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
-    marker.scale.z = 0.1;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
-    //only if using a MESH_RESOURCE marker type:
-    vis_pub.publish( marker );
+      //cout << (hull.dims[0].max-hull.dims[0].min) << ", " << (hull.dims[1].max-hull.dims[1].min) << endl;
+      ma.markers.push_back(marker);
+    }
+
+    vis_pub.publish( ma );
   }
   
 }
@@ -204,7 +217,7 @@ int main(int argc, char **argv)
     message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 1);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
-    vis_pub = n.advertise<visualization_msgs::Marker>( "reach_hull", 5 );
+    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "reach_hull", 100 );
   
     sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
 
@@ -213,9 +226,10 @@ int main(int argc, char **argv)
     Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
 
-
+    ros::Rate r(10);
     while(ros::ok())
     {
+      r.sleep();
       ros::spinOnce();
     }
 

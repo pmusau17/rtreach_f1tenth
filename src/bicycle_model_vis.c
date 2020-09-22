@@ -61,14 +61,7 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[1].max = r->dims[1].max  + 0.15;
 
 	
-	// copy intermediate state into array
-	// add state to array for plotting
-	if(num_intermediate < MAX_INTERMEDIATE)
-	{
-		VisStates[num_intermediate] = *r;
-		num_intermediate++;
-	}	
-	total_intermediate++;
+	
 
 	allowed = check_safety_obstacles(r);
 	
@@ -82,6 +75,15 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[0].max = r->dims[0].max  - 0.25;
 	r->dims[1].min = r->dims[1].min  + 0.15;
 	r->dims[1].max = r->dims[1].max  - 0.15;
+
+	// copy intermediate state into array
+	// add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE)
+	{
+		VisStates[num_intermediate] = *r;
+		num_intermediate++;
+	}	
+	total_intermediate++;
 
 	if(!allowed)
 		printf("unsafe....\n");
