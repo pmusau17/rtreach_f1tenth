@@ -258,7 +258,7 @@ If a collision occurs during any of the experiments it will be logged along with
 
 ## Docker
 
-In order to the experiments using docker [NVIDIA-Docker](https://github.com/NVIDIA/nvidia-docker) must be installed. If it is not installed run the following:
+[NVIDIA-Docker](https://github.com/NVIDIA/nvidia-docker) is a requirement for running dockerized. If it is not installed run the following:
 
 ```
 $ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
