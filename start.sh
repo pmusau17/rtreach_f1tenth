@@ -1,2 +1,2 @@
 source /catkin_ws/devel/setup.bash
-roslaunch f1tenth_gym_ros gym_bridge.launch
+rosrun rtreach reach_node porto_obstacles.txt
