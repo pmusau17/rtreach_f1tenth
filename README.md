@@ -273,6 +273,8 @@ Once that is installed use the [build_docker.sh] file to build the docker images
 $ ./build_docker.sh
 ```
 
+This should take about 10-15 minutes.
+
 In order to  enable the use of graphical user interfaces within Docker containers such as Gazebo and Rviz give docker the rights to access the X-Server with:
 
 ```bash
