@@ -256,6 +256,48 @@ If a collision occurs during any of the experiments it will be logged along with
 - [bicycle_model_plots.c](src/bicycle_model_plots.c): Same as above but intented for plotting purposes.
 - [util.c](src/util.c): Helper functions for timing and printing. 
 
-#### Coming soon...
-Dockerized implementation. Bug me if this doesn't happen soon.
+#### Docker
+
+In order to the experiments using docker [NVIDIA-Docker](https://github.com/NVIDIA/nvidia-docker) must be installed. If it is not installed run the following:
+
+```
+$ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+$ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+$ sudo apt-get update && sudo apt-get install -y nvidia-docker2
+$ sudo systemctl restart docker
+```
+Once that is installed use the [build_docker.sh] file to build the docker images:
+
+```
+$ ./build_docker.sh
+```
+
+In order to  enable the use of graphical user interfaces within Docker containers such as Gazebo and Rviz give docker the rights to access the X-Server with:
+
+```bash
+$ xhost +local:docker
+``` 
+
+This command allows one to connect a container to a host's X server for display **but it is not secure.** It compromises the access control to X server on your host. So with a little effort, someone could display something on your screen, capture user input, in addition to making it easier to exploit other vulnerabilities that might exist in X.
+ 
+**So When you are done run :** 
+
+```bash
+$ xhost -local:docker
+``` 
+
+### Starting the Simulation: 
+
+To start the simuation run: 
+
+```
+$ docker container run --runtime=nvidia -it -e DISPLAY  --rm --net=host --env="QT_X11_NO_MITSHM=1" -v /tmp/.X11-unix:/tmp/.X11-unix simulator
+```
+
+Once gazebo and rviz have completed their startup, in a seperate terminal run: 
+
+```
+docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
+```
 

@@ -46,18 +46,21 @@ RUN pip install empy imutils
 RUN apt-get install -y nano
 RUN apt-get install -y net-tools
 
-RUN pip install --upgrade pip && apt-get remove -y python-enum34 python-pyasn1-modules
-RUN pip2 install numpy scipy &&  pip2 install tensorflow-gpu
-RUN sudo apt-get install -y python-opencv && apt-get install -y ros-kinetic-cv-bridge ros-kinetic-vision-opencv
-RUN pip install pathlib
+RUN pip install --upgrade pip && apt-get remove -y python-enum34 python-pyasn1-modules && pip2 install numpy scipy &&  pip2 install tensorflow-gpu && apt-get install -y python-opencv && apt-get install -y ros-kinetic-cv-bridge ros-kinetic-vision-opencv && pip install pathlib
 
 #navigate to the home directory
 WORKDIR home
-RUN mkdir -p catkin_ws
-WORKDIR catkin_ws
-RUN git clone https://github.com/pmusau17/Platooning-F1Tenth src
+RUN git clone https://github.com/pmusau17/Platooning-F1Tenth
+WORKDIR Platooning-F1Tenth 
 RUN /bin/bash -c 'source /opt/ros/kinetic/setup.bash && catkin_make'
 
+# get the model files so that there's no lag in starting gazebo
+RUN apt-get install wget && wget -l 2 -nc -r "http://models.gazebosim.org/" --accept gz && mkdir /usr/share/gazebo-7/models/
+WORKDIR models.gazebosim.org
+RUN ls /usr/share/gazebo && ls /usr/share/gazebo-7 && for i in *; do tar -zvxf "$i/model.tar.gz";  done && mv * /usr/share/gazebo-7/models/
+WORKDIR .. 
+RUN rm -r models.gazebosim.org
 
+RUN apt-get install -y ros-kinetic-gazebo-ros-pkgs
 
-CMD /bin/bash -c "source devel/setup.bash && roslaunch race rtreach.launch -v"
+CMD /bin/bash -c "source devel/setup.bash && roslaunch race rtreach.launch verbose:=true"
