@@ -63,7 +63,7 @@ As we can see our initial computation identified a collision with a cone in the 
 We can visualize the results of the above example by executing the following: 
 
 ```
-$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot 
+$ gcc -std=gnu99 -O3 -Wall  face_lift_bicycle_model_visualization.c geometry.c interval.c simulate_bicycle_plots.c util.c  dynamics_bicycle_model.c  bicycle_plots_main.c bicycle_model_plots.c -lm -o bicycle_plot
 ```
 
  and then: 
@@ -82,6 +82,10 @@ Usage of plotting utilities:
 $ ./bicycle_plot (milliseconds-runtime) (seconds-reachtime) (x) (y) (linear velocity) (heading) (throttle control input) (heading control input)
 ```
 
+![Block Diagram](images/reach_bicycle.png)
+
+In the above image, the green rectangles are the intermediate reachable sets encountered after each face-lifting operation, and the red rectangle is the convex hull of these rectangles.
+
 ### Building rtreach as a C library. 
 
 Now that you have a taste of what rtreach is, we can move on to the more fun part. Using rtreach within ROS. By doing this, we can implement a safety monitor using the archtichture displayed again below: 
@@ -91,13 +95,15 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
-$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c  -lm 
+$ cd src
+$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
 ```
 
 Next create a shared library:
 
 ```
 $ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
+$ gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o
 ```
 
 This will create a file called **libRtreach.so**. 
@@ -132,56 +138,112 @@ The platform that we seek to use these techniques on is a 1/10 scale autonomous 
 Once that is installed, create the ros package: 
 
 ```
- cd ..
- mkdir -p ../rtreach_ros/src
+$ cd ..
+$ mkdir -p ../rtreach_ros/src
 ```
 
 Create the ros-nodes into the package created above:
 
 ```
-cp -r ros_src/rtreach/ ../rtreach_ros/src/
+$ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 ```
 
+```
+$ cp run_batch.sh ../rtreach_ros
+```
 Copy the rtreach shared library into the package:
 
 ```
-cp src/libRtreach.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h ../rtreach_ros/src/rtreach/src/
+$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
 ```
 Build the ros-package.
 ```
-cd ../rtreach_ros && catkin_make
+$ cd ../rtreach_ros && catkin_make
 ```
 and then: 
 
 ```
-source devel/setup.bash
+$ source devel/setup.bash
 ```
 
 ### Running Rtreach
 
-Start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle.
+In the Platooning-F1Tenth ros package execute the following: 
 
 ```
-roslaunch race rtreach.launch 
+$ source devel/setup.bash
 ```
 
-The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8. The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
+
+Then start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle. 
+
+```
+$ roslaunch race rtreach.launch 
+```
+
+The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8). The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
 
 
 Run the safety monitor + safety_controller + neural network controller. 
 
 ```
-rosrun rtreach reach_node_sync porto_obstacles.txt
+$ rosrun rtreach reach_node porto_obstacles.txt
 ```
 In this setup the decision manager will allow the neural network model to control the vehicle so long as the control command issue will not cause the vehicle to enter an unsafe state in the next one second. Otherwise the safety controller will be used. The decision manager can then return to the neural network controller provided that the car has been in a safe operating mode for 20 control steps. 
 
 
 To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
 
+Arguments that can be provided to the [rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch): 
+- world_name: gazebo world file used to generate environment.
+- model_name: network .hdf5 keras model file. 
+- csv_filename: waypoint file used by pure pursuit algorithm.
+- lec_only: flag that limits experiment to LEC only control.
+- map_file: occupancy grid for corresponding world name. 
+- random_seed: random seed used to allocte obstacles within vehicle environment.
+- freespace_file: free space points within occupancy grid this file is generate by [gen_map.py](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/scripts/gen_map.py)
+- timeout: how long to run each experiment before timeout.
+
+Example specification of argument parameter: **argument_name:=value** 
+
+```
+$ roslaunch race rtreach.launch timeout:=10 
+```
+
+## Visualizing the Reachable Set
+
+You can visualize the reachable set by running the following: 
+
+```
+$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 80
+```
+
+Usage: 
+
+```
+$ rosrun rtreach visualize_node (file containing obstacle locations) (boolean for bloating of reachset) (reachset time horizon) (reachability wall time)
+```
+
+![REACH_HULL](images/reach_hull.gif)
+
+
+## Run a Series of Experiments
+
+One of the things that may be useful to do is to run a series of simulations with a diverse number of obstacle placements for a given track. Then one can monitor how effective the safety controller under consideration is. We have made this functionality available. The bash script [run_batch.sh](run_batch.sh) performs several experiments with a timeout of 30 seconds and  randomly places obstacles within the racetrack.
+
+To use the script first source both the rtreach and Platooning-F1Tenth packages and then run the bash file:
+
+```
+./run_batch
+```
+
+If a collision occurs during any of the experiments it will be logged along with the random_seed, and number of obstacles so that the scenario can be re-produced. The logs can be found in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/logs).
+
 ## Repository Organization
 
 **ros_src/rtreach:** ros-package containing rtreach implementation.
 - [reach_node_sync.cpp](ros_src/rtreach/src/reach_node_sync.cpp): ROS-node implementation of safety monitor and controller. 
+- [visualize_reachset.cpp](ros_src/rtreach/src/visualize_reachset.cpp): ROS-node for visualization of hyper-rectangles.
 
 **src:** C-implementation of rtreach.
 - [dynamics_bicycle_model.c](src/dynamics_bicycle_model.c): Interval arithmetic implementation of a kinematic bicycle model for a car. Parameters are identified using [grey-box system identification](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/race/sys_id).
@@ -195,6 +257,50 @@ To select a different set of weights for the neural network, you can specify the
 - [bicycle_model_plots.c](src/bicycle_model_plots.c): Same as above but intented for plotting purposes.
 - [util.c](src/util.c): Helper functions for timing and printing. 
 
-#### Coming soon...
-Dockerized implementation. Bug me if this doesn't happen soon.
+## Docker
+
+[NVIDIA-Docker](https://github.com/NVIDIA/nvidia-docker) is a requirement for running dockerized. If it is not installed run the following:
+
+```
+$ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+$ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+$ sudo apt-get update && sudo apt-get install -y nvidia-docker2
+$ sudo systemctl restart docker
+```
+Once that is installed use the [build_docker.sh] file to build the docker images:
+
+```
+$ ./build_docker.sh
+```
+
+This should take about 10-15 minutes.
+
+In order to  enable the use of graphical user interfaces within Docker containers such as Gazebo and Rviz give docker the rights to access the X-Server with:
+
+```bash
+$ xhost +local:docker
+``` 
+
+This command allows one to connect a container to a host's X server for display **but it is not secure.** It compromises the access control to X server on your host. So with a little effort, someone could display something on your screen, capture user input, in addition to making it easier to exploit other vulnerabilities that might exist in X.
+ 
+**So When you are done run :** 
+
+```bash
+$ xhost -local:docker
+``` 
+
+### Starting the Simulation: 
+
+To start the simuation run: 
+
+```
+$ docker container run --runtime=nvidia -it -e DISPLAY  --rm --net=host --env="QT_X11_NO_MITSHM=1" -v /tmp/.X11-unix:/tmp/.X11-unix simulator
+```
+
+Once gazebo and rviz have completed their startup, in a seperate terminal run: 
+
+```
+docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
+```
 

@@ -22,9 +22,12 @@
 extern "C"
 { 
      #include "bicycle_safety.h"
-     bool runReachability_bicycle(double * start, double  simTime, double  wallTimeMs, double  startMs,double  heading_input, double  throttle);
+     #include "simulate_bicycle_plots.h"
+     HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle);
      void deallocate_2darr(int rows,int columns);
      void load_wallpoints(const char * filename, bool print);
+     HyperRectangle hull;
+     void println(HyperRectangle * r);
      void allocate_obstacles(int num_obstacles,double (*points)[2]);
      void deallocate_obstacles(int num_obstacles);
 }
@@ -37,17 +40,19 @@ extern "C"
 */
 
 
-ros::Publisher ackermann_pub; // control command publisher
+ros::Publisher ackermann_pub; 
+ros::Publisher vis_pub;
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-const double sim_time = 1.0;
-double ms = 0.0; // this is redundant will remove in refactoring
-const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
-
+double sim_time = 1.0;
+double walltime = 10; // this in ms apparently wtf the declaration doesn't say that 
 int markers_allocated = 0;
-bool stop = false;
-int safePeriods =0;
+bool bloat_reachset = false;
+
+
+
+
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg)
@@ -57,7 +62,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
   double roll, pitch, yaw, lin_speed;
   double x,y,u,delta;
-  bool safe_to_continue;
+  
 
   x = msg-> pose.pose.position.x;
   y = msg-> pose.pose.position.y;
@@ -99,41 +104,49 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   {
     ackermann_msgs::AckermannDriveStamped ack_msg;
     
-  
-    if(stop && safePeriods>30)
+    hull = runReachability_bicycle_vis(state, sim_time, walltime, 0, delta, u);
+    printf("num_boxes: %d, ",num_intermediate);
+    visualization_msgs::MarkerArray ma;
+    for(int i = 0; i<num_intermediate;i++)
     {
-      stop = false;
+      hull = VisStates[i];
+
+      // if we want to bloat the hyper-rectangles for the width of the car
+      if(bloat_reachset)
+      {
+        hull.dims[0].min = hull.dims[0].min  - 0.25;
+        hull.dims[0].max = hull.dims[0].max  + 0.25;
+        hull.dims[1].min = hull.dims[1].min  - 0.15;
+        hull.dims[1].max = hull.dims[1].max  + 0.15;
+      }
+      
+      visualization_msgs::Marker marker;
+      marker.header.frame_id = "/map";
+      marker.header.stamp = ros::Time::now();
+      marker.id = i;
+      marker.type = visualization_msgs::Marker::CUBE;
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
+      marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
+      
+      marker.pose.position.z = 0.0;
+      marker.pose.orientation.x = 0.0;
+      marker.pose.orientation.y = 0.0;
+      marker.pose.orientation.z = 0.0;
+      marker.pose.orientation.w = 1.0;
+      marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
+      marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
+      marker.scale.z = 0.05;
+      marker.color.a = 1.0; 
+      marker.color.r = (double) rand() / (RAND_MAX);
+      marker.color.g = (double) rand() / (RAND_MAX);
+      marker.color.b = (double) rand() / (RAND_MAX);
+      marker.lifetime =ros::Duration(0.1); 
+      ma.markers.push_back(marker);
     }
 
-    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
-    if (safe_to_continue && !stop)
-    {
-        ack_msg.drive.steering_angle = delta;
-        ack_msg.drive.speed = u;
-        ack_msg.header.stamp = ros::Time::now();
-        ackermann_pub.publish(ack_msg);
-    }
-        
-    else
-    {
-        cout << "safe: angle: " << safety_msg->drive.steering_angle << " safe speed: " << safety_msg->drive.speed << endl;
-        ack_msg.drive.steering_angle = safety_msg->drive.steering_angle;
-        ack_msg.drive.speed = safety_msg->drive.speed;
-        ack_msg.header.stamp = ros::Time::now();
-        ackermann_pub.publish(ack_msg);
-        ROS_WARN("using safety controller.");
-        cout << "using safety controller...safe?: " << safe_to_continue << endl; 
-        stop = true;
-    }
-
-    if(stop & safe_to_continue)
-    {
-      safePeriods+=1;
-    }
-    else
-    {
-      safePeriods = 0;
-    }
+    // publish marker
+    vis_pub.publish( ma );
   }
   
 }
@@ -171,11 +184,32 @@ int main(int argc, char **argv)
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
     
+    // file describing walls of simulation environment
     if(argv[1] == NULL)
     {
         std::cout << "Please provide the file containing the obstacle locations (i.e porto_obstacles.txt)" << std::endl;
         exit(0);
     }
+
+    // whether or not to bloat the reachset for the width of the car
+    if(argv[2] != NULL)
+    {
+        bloat_reachset = (bool) atoi(argv[2]);
+    }
+
+    // simulation time argument
+    if(argv[3]!=NULL)
+    {
+      sim_time= atof(argv[3]);
+    }
+
+     // wall time for reachability algorithm
+    if(argv[4]!=NULL)
+    {
+      walltime= atof(argv[4]);
+    }
+
+
    
     std::string filename = argv[1];
 
@@ -186,7 +220,7 @@ int main(int argc, char **argv)
     using namespace message_filters;
 
     // initialize the ros node
-    ros::init(argc, argv, "reachnode_sync");
+    ros::init(argc, argv, "visualize_node");
 
     ros::NodeHandle n;
     // ackermann publisher 
@@ -202,18 +236,19 @@ int main(int argc, char **argv)
     message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 1);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
+    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "reach_hull", 100 );
   
     sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
-
 
     typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
     Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
 
-
+    ros::Rate r(80);
     while(ros::ok())
     {
+      r.sleep();
       ros::spinOnce();
     }
 

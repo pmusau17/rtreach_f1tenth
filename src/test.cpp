@@ -9,7 +9,6 @@ int main(void)
 {
     
     
-    double ms = 100;
     double startState[4] = {0.0, 0.0, 0.0, 0.0};
     double control_input[2] = {0.0,0.0};
 

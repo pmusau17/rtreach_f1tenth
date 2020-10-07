@@ -2,8 +2,8 @@
 #include "main.h"
 #include "face_lift.h"
 #include "util.h"
-#include "simulate_bicycle.h"
 #include "bicycle_safety.h"
+#include "simulate_bicycle_plots.h"
 #include <stdio.h>
 #include <string.h> 
 #include <stdlib.h>
@@ -13,17 +13,12 @@
 // the car is 0.5 m long in the x direction 
 // 0.3 long in the y direction
 
-
-
-
 // do face lifting with the given settings, iteratively improving the computation
 // returns true if the reachable set of states is satisfactory according to the
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
 
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
-
-// helper function to check safety
-// bool check_safety(HyperRectangle* rect, double (*box)[2]); 
+// visualization version, returns convex hull
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 
 
 // function that stops simulation after two seconds
@@ -44,18 +39,13 @@ bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 }
 
 
-
-// Simulation 
-REAL getSimulatedSafeTime(REAL start[4],REAL heading_input,REAL throttle)
+// if computation restarts we close and reopen files
+void restartedComputation()
 {
-	REAL stepSize = 0.02f;
-	REAL rv = 0.0f;
-
-	simulate_bicycle(start, heading_input,throttle,stepSize, shouldStop, (void*)&rv); // TODO: look here
-
-	//DEBUG_PRINT("time until simulation reaches safe state = %f\n", rv);
-
-	return rv;
+	// reset the counter of intermediate states 
+	num_intermediate = 0;
+	total_intermediate = 0;
+	final_hull = false;
 }
 
 // called on states reached during the computation
@@ -71,6 +61,8 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[1].max = r->dims[1].max  + 0.15;
 
 	
+	
+
 	allowed = check_safety_obstacles(r);
 	
 	if(allowed)
@@ -84,8 +76,17 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[1].min = r->dims[1].min  + 0.15;
 	r->dims[1].max = r->dims[1].max  - 0.15;
 
-	if(!allowed)
-		printf("unsafe....\n");
+	// copy intermediate state into array
+	// add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE)
+	{
+		VisStates[num_intermediate] = *r;
+		num_intermediate++;
+	}	
+	total_intermediate++;
+
+	//if(!allowed)
+		// printf("unsafe....\n");
 	return allowed;
 }
 
@@ -98,9 +99,8 @@ bool finalState(HyperRectangle* rect)
 }
 
 
-
-
-bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
+// reachability analysis
+HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
 	for (int d = 0; d < NUM_DIMS; ++d)
@@ -115,18 +115,12 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
 	REAL iss = set.reachTime;
 	iss = iss * 0.10f;
 
-	
-	
-
-	set.initialStepSize = iss; 
+	set.initialStepSize = iss; //set.reachTime / 10.0f;
 	set.maxRectWidthBeforeError = 100;
 
 	set.reachedAtFinalTime = finalState;
 	set.reachedAtIntermediateTime = intermediateState;
-	set.restartedComputation = 0; //restartedComputation;
+    set.restartedComputation = restartedComputation; 
 
-	return face_lifting_iterative_improvement_bicycle(startMs, &set,heading_input, throttle);
+	return face_lifting_iterative_improvement_bicycle_vis(startMs, &set,heading_input, throttle,false);
 }
-
-
-

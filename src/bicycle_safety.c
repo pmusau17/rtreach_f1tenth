@@ -1,3 +1,7 @@
+// Patrick Musau
+// 08-2020
+// Safety checking for f1tenth model file
+
 #include "bicycle_safety.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -9,8 +13,10 @@
 
 // provide initial value for global variables
 double ** wallCoords = 0;
+double *** obstacles = 0;
 int file_rows = 0;
 int file_columns = 0;
+int obstacle_count;
 
 
 // function that allocates the 2d array of wall points
@@ -108,6 +114,8 @@ void load_wallpoints(const char * filename, bool print)
 }
 
 
+
+
 bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
 {
 	
@@ -127,6 +135,26 @@ bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
 }
 
 
+bool check_safety_obstacles(HyperRectangle* rect)
+{
+    // loop through the obstacles
+    bool allowed;
+    
+	for (int j = 0; j < obstacle_count; j++)
+	{	
+        double obs[2][2]  = {{obstacles[j][0][0],obstacles[j][0][1]}, {obstacles[j][1][0],obstacles[j][1][1]}};
+        allowed= check_safety(rect,obs);
+        if(!allowed)
+        {   
+            // printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
+            break;
+        }
+	}
+
+    return allowed;
+}
+
+
 bool check_safety_wall(HyperRectangle* rect)
 {
     bool safe = true; 
@@ -136,9 +164,81 @@ bool check_safety_wall(HyperRectangle* rect)
         safe = check_safety(rect,point);
         if(!safe)
         {
-            printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
+            // printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
             break;
         }
     }
     return safe;
+}
+
+
+// function that allocates the 3d array for the obstacles
+void allocate_obstacles(int num_obstacles,double (*points)[2])
+{
+
+    int rows = num_obstacles;
+    obstacle_count = num_obstacles;
+    int cols = 2;
+    int height = 2;
+    int i,j;
+    double w = 0.13;
+    double h = 0.13;
+
+    obstacles = (double***)malloc(rows * sizeof(double **));
+    
+    // check if memory was allocated 
+    if(obstacles == NULL)
+	{
+		fprintf(stderr, "out of memory\n");
+		exit(0);
+	}
+
+    for(i=0;i<rows;i++)
+    {
+        obstacles[i] = (double **)malloc(cols * sizeof(double*));
+        // check if memory was allocated
+        if(obstacles[i] == NULL)
+		{
+			fprintf(stderr, "out of memory\n");
+			exit(0);
+		}
+        for(j=0;j<cols;j++)
+        {
+            obstacles[i][j] = (double*)malloc(height*sizeof(double));
+            // check if memory was allocated
+            if(obstacles[i][j] == NULL)
+		    {
+			    fprintf(stderr, "out of memory\n");
+			    exit(0);
+		    }
+        }
+    }
+
+    printf("interval list of obstacles: \n");
+    for(i=0;i<rows;i++)
+    {
+        obstacles[i][0][0] = points[i][0]-w/2.0;
+        obstacles[i][0][1] = points[i][0]+w/2.0;
+        obstacles[i][1][0] = points[i][1]-h/2.0;
+        obstacles[i][1][1] = points[i][1]+h/2.0;
+        printf("[%f,%f], [%f,%f]\n", obstacles[i][0][0],obstacles[i][0][1],obstacles[i][1][0],obstacles[i][1][1]);
+    }
+    printf("\n");
+}
+
+// free the memory allocated for the wall points
+void deallocate_obstacles(int num_obstacles)
+{
+    int rows = num_obstacles;
+    int cols = 2;
+    int i,j;
+    for(i=0;i<rows;i++)
+    {
+        for(j=0;j<cols;j++)
+        {
+            free(obstacles[i][j]);
+        }
+        free(obstacles[i]);
+    }
+    free(obstacles);
 }

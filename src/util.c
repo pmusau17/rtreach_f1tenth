@@ -57,7 +57,7 @@ long int milliseconds()
 	long int ms = now.tv_usec / 1000;
     long int ds = difSec * 1000 + ms;
 	
-	printf("from milliseconds: %ld\n",ds);
+	// printf("from milliseconds: %ld\n",ds);
 	return ds;
 }
 

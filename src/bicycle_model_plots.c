@@ -10,15 +10,20 @@ static FILE* f_intermediate;
 static FILE* f_final;
 
 
+// global variable definitions 
+double maxTime = 2.0;
 
-// declaration 
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+// do face lifting with the given settings, iteratively improving the computation
+// returns true if the reachable set of states is satisfactory according to the
+// function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
+// returns the convex hull of the reachset
+
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 
 // function that stops simulation after two seconds
 bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 {
 	bool rv = false;
-    REAL maxTime = 2.0f;
     // stop if the maximum simulation time 
 	if (simTime >= maxTime)
 	{
@@ -31,15 +36,7 @@ bool shouldStop(REAL state[NUM_DIMS], REAL simTime, void* p)
 	return rv;
 }
 
-// This function enumerates all of the corners of the current HyperRectangle and 
-// returns whether or not any of the points lies outside of the ellipsoid. The corner
-// Thing is only really helpful for linear models.
-bool finalState(HyperRectangle* rect)
-{
-	REAL maxPotential = 0.0;
 
-	return maxPotential > 1;
-}
 
 
 // Simulation 
@@ -90,6 +87,11 @@ void restartedComputation()
 	// close and open the files to clear them
 	close_files(false);
 	open_files(false);
+
+	// reset the counter of intermediate states 
+	num_intermediate = 0;
+	total_intermediate = 0;
+	final_hull = false;
 }
 
 // styleIndex: 0 = init, 1 = intermediate, 2 = final
@@ -105,7 +107,7 @@ void hyperrectangle_to_file(FILE* fout, HyperRectangle* r, int styleIndex)
 		{
 			"set label ' Init' at %f, %f point pointtype 3 lc rgb 'blue' tc rgb 'blue'",
 			"set obj rect from %f, %f to %f, %f fc rgbcolor 'dark-green' fs solid 0.2 \n",
-			"set obj rect from %f, %f to %f, %f fc rgbcolor 'red' fs solid 0.3 noborder\n",
+			"set obj rect from %f, %f to %f, %f fc rgbcolor 'red' fs solid 0.3\n",
 		};
 
 		fprintf(fout, styleStr[styleIndex], r->dims[X_DIM].min, r->dims[Y_DIM].min,
@@ -119,25 +121,48 @@ void hyperrectangle_to_file(FILE* fout, HyperRectangle* r, int styleIndex)
 // during the reachset computation
 bool intermediateState(HyperRectangle* r)
 {
-	bool allowed = true;
 
 	hyperrectangle_to_file(f_intermediate, r,1);
+	
+	// add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE)
+	{
+		VisStates[num_intermediate] = *r;
+		num_intermediate++;
+	}	
+	total_intermediate++;
 
-	return allowed;
+	return true;
+}
+
+// This function enumerates all of the corners of the current HyperRectangle and 
+// returns whether or not any of the points lies outside of the ellipsoid. The corner
+// Thing is only really helpful for linear models.
+bool finalState(HyperRectangle* rect)
+{
+	hyperrectangle_to_file(f_final, rect,2);
+	// final state to array if space permits add state to array for plotting
+	if(num_intermediate < MAX_INTERMEDIATE && !final_hull)
+	{
+		VisStates[num_intermediate] = *rect;
+		num_intermediate++;
+	}
+	final_hull = true;
+	total_intermediate++;
+
+	return false;
 }
 
 
 
 // reachability analysis
-bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
+HyperRectangle runReachability_bicycle_vis(REAL* start, REAL simTime, REAL wallTimeMs, REAL startMs,REAL heading_input, REAL throttle)
 {
 	LiftingSettings set;
-	printf("Starting reachability computation from the following state:\n");
 	for (int d = 0; d < NUM_DIMS; ++d)
 	{
 		set.init.dims[d].min = start[d];
 		set.init.dims[d].max = start[d];
-		printf("[%f,%f]\n",set.init.dims[d].min,set.init.dims[d].max);
 	}
 
 	set.reachTime = simTime;
@@ -145,10 +170,6 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
 
 	REAL iss = set.reachTime;
 	iss = iss * 0.10f;
-
-	DEBUG_PRINT("\n\rsimTime: %f\n\rreachTime: %f\n\r\n\r", simTime, set.reachTime);
-	
-	
 
 	set.initialStepSize = iss; //set.reachTime / 10.0f;
 	set.maxRectWidthBeforeError = 100;
@@ -160,9 +181,6 @@ bool runReachability_bicycle(REAL* start, REAL simTime, REAL wallTimeMs, REAL st
     open_files(true);
 	hyperrectangle_to_file(f_initial, &set.init, 0);
 
-	// debugging for patrick
-	printf("Beginning Reachability Analysis >>>> initialStepSize: %f, reachTime: %f\n\n",set.initialStepSize,set.reachTime);
-
-	return face_lifting_iterative_improvement_bicycle(startMs, &set,heading_input, throttle);
+	return face_lifting_iterative_improvement_bicycle_vis(startMs, &set,heading_input, throttle,true);
 }
 

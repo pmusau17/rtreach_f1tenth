@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "bicycle_model.h"
+#include "simulate_bicycle_plots.h"
 #include "util.h"
 
 int main(int argc, char** argv)
@@ -28,7 +29,8 @@ int main(int argc, char** argv)
 		}
         
         double reachTime = atof(argv[2]);
-        printf("Reach time is %f seconds\n", reachTime);
+		maxTime = reachTime;
+        printf("Reach time is %f seconds, simTime is %f seconds\n", reachTime,maxTime);
 
 		// setttings for pendulum
 		double startState[4] = {atof(argv[3]), atof(argv[4]), atof(argv[5]), atof(argv[6])};
@@ -46,9 +48,8 @@ int main(int argc, char** argv)
     	printf("\n");
 		
     	// run reachability analysis test 
-    	bool safe = runReachability_bicycle(startState, reachTime, ms, milliseconds(),delta,u);
-
-		printf("finished computation, result = %s\n", safe ? "safe" : "unsafe");
+    	HyperRectangle hull = runReachability_bicycle_vis(startState, reachTime, ms, milliseconds(),delta,u);
+		println(&hull);
 	}
 
 	return rv;

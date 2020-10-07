@@ -11,15 +11,22 @@
 #include "main.h"
 #include "face_lift.h"
 #include "util.h"
-
+#include "simulate_bicycle_plots.h"
 
 
 // do face lifting with the given settings, iteratively improving the computation
 // returns true if the reachable set of states is satisfactory according to the
 // function you provide in LiftingSettings (reachedAtIntermediateTime, reachedAtFinalTime)
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle);
+// returns the convex hull of the reachset
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings, REAL heading_input, REAL throttle,bool plot);
 REAL get_derivative_bounds_bicycle(HyperRectangle* rect, int faceIndex,REAL heading_input, REAL throttle);
 
+
+// Global Variable Declarations
+struct HyperRectangle VisStates[MAX_INTERMEDIATE];
+bool final_hull = false;
+int total_intermediate = 0;
+int num_intermediate = 0;
 
 
 // Constants necessary to guarantee loop termination.
@@ -241,7 +248,7 @@ REAL lift_single_rect_bicycle(HyperRectangle* rect, REAL stepSize, REAL timeRema
 }
 
 
-bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* settings,REAL heading_input, REAL throttle)
+HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, LiftingSettings* settings,REAL heading_input, REAL throttle,bool plot)
 {
 	bool rv = false;
 	bool lastIterationSafe = false;
@@ -251,6 +258,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	int elapsedTotal;
 	gettimeofday(&start, NULL);
 	set_error_print_params(settings);
+    HyperRectangle total_hull;
 
 	// Get the settings from the facelifting settings
 	REAL stepSize = settings->initialStepSize;
@@ -344,13 +352,21 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
+                if(plot)
+                {
+                    settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                }
+				    
 				rv = lastIterationSafe;
-				println(&trackedRect);
 				break;
 			}
 			if(!safe)
 				//printf("unsafe\n");
-				println(&hull);
+                if(plot)
+                {
+                    settings->reachedAtFinalTime(&total_hull); // purely for plotting purposes
+                }
+				//println(&hull);
 		} 
 		else
 		{
@@ -370,7 +386,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	}
 	DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
-
-	return rv;
+    printf("safe: %d\n",rv);
+	return total_hull;
 }
 
