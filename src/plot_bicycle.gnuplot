@@ -6,8 +6,8 @@ set xlabel "x"
 set ylabel "y"
 
 # ranges for pendulum
-set xrange [-1.1:0.3]
-set yrange [0.0:1.0]
+set xrange [-3.3:6.4]
+set yrange [-0.73:5.923]
 
 load "bicycle_initial.gnuplot.txt"
 load "bicycle_intermediate.gnuplot.txt"
