@@ -214,7 +214,7 @@ add_message_files(
   FILES
   velocity_msg.msg
   angle_msg.msg
-  velocity_msg.msg
+  stamped_ttc.msg
 )
 
 generate_messages(
