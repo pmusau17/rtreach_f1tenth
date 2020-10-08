@@ -207,7 +207,7 @@ int main(int argc, char **argv)
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar/angle_msg", 10);
-    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 1);
+    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar/ttc", 10);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
