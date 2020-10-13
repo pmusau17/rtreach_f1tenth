@@ -138,7 +138,7 @@ bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
 bool check_safety_obstacles(HyperRectangle* rect)
 {
     // loop through the obstacles
-    bool allowed;
+    bool allowed = true;
     
 	for (int j = 0; j < obstacle_count; j++)
 	{	
@@ -146,7 +146,7 @@ bool check_safety_obstacles(HyperRectangle* rect)
         allowed= check_safety(rect,obs);
         if(!allowed)
         {   
-            // printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
+            printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
             break;
         }
 	}
@@ -164,7 +164,7 @@ bool check_safety_wall(HyperRectangle* rect)
         safe = check_safety(rect,point);
         if(!safe)
         {
-            // printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
+            printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
             break;
         }
     }
