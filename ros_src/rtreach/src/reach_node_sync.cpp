@@ -43,8 +43,7 @@ ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
 double sim_time = 1.0;
-double ms = 0.0; // this is redundant will remove in refactoring
-const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
+const double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
 bool stop = false;
@@ -113,7 +112,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       stop = false;
     }
 
-    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, 0.0, delta, u);
     if (safe_to_continue && !stop)
     {
         ack_msg.drive.steering_angle = delta;

@@ -47,7 +47,7 @@ ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
 double sim_time = 1.0;
-double walltime = 10; // this in ms apparently wtf the declaration doesn't say that 
+double walltime = 25; // 25 ms corresponds to 40 hz 
 int markers_allocated = 0;
 bool bloat_reachset = false;
 double ttc = 0.0;
