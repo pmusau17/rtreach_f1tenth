@@ -87,7 +87,7 @@ bool intermediateState(HyperRectangle* r)
 
 	//if(!allowed)
 		// printf("unsafe....\n");
-	return allowed;
+	return true;
 }
 
 // This function enumerates all of the corners of the current HyperRectangle and 
