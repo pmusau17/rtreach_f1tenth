@@ -139,7 +139,6 @@ bool check_safety_obstacles(HyperRectangle* rect)
 {
     // loop through the obstacles
     bool allowed = true;
-    
 	for (int j = 0; j < obstacle_count; j++)
 	{	
         double obs[2][2]  = {{obstacles[j][0][0],obstacles[j][0][1]}, {obstacles[j][1][0],obstacles[j][1][1]}};
@@ -165,6 +164,7 @@ bool check_safety_wall(HyperRectangle* rect)
         if(!safe)
         {
             printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
+            println(rect);
             break;
         }
     }

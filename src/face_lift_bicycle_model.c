@@ -345,12 +345,12 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 				// note in a real system you would have an interrupt or something to cut off computation
 				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 				rv = lastIterationSafe;
-				println(&trackedRect);
+				//println(&trackedRect);
 				break;
 			}
-			if(!safe)
-				//printf("unsafe\n");
-				println(&hull);
+			// if(!safe)
+			// 	//printf("unsafe\n");
+			// 	println(&hull);
 		} 
 		else
 		{
