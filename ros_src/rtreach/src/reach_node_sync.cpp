@@ -6,6 +6,7 @@
 #include <ackermann_msgs/AckermannDriveStamped.h>
 #include <rtreach/angle_msg.h>
 #include <rtreach/velocity_msg.h>
+#include <rtreach/stamped_ttc.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -13,7 +14,7 @@
 #include <ros/console.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
-
+#include <math.h>
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
 // It will also receive messages from the speed node which will dictate how fast the car should travel
@@ -41,16 +42,15 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-const double sim_time = 1.0;
-double ms = 0.0; // this is redundant will remove in refactoring
-const double walltime = 80; // this in ms apparently wtf the declaration doesn't say that 
-
+double sim_time = 1.0;
+const double walltime = 25; // 25 ms corresponds to 40 hz
+double ttc = 0.0;
 int markers_allocated = 0;
 bool stop = false;
 int safePeriods =0;
 
 
-void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg)
+void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
 {
   using std::cout;
   using std::endl;
@@ -58,6 +58,13 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   double roll, pitch, yaw, lin_speed;
   double x,y,u,delta;
   bool safe_to_continue;
+  
+  ttc = ttc_msg->ttc;
+  
+  // the lookahead time should be dictated by the lookahead time
+  // since the car is moving at 1 m/s the max sim time is 1.5 seconds
+  sim_time = fmin(1.5*ttc,1.5);
+  std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
   y = msg-> pose.pose.position.y;
@@ -105,7 +112,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       stop = false;
     }
 
-    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, ms, delta, u);
+    safe_to_continue= runReachability_bicycle(state, sim_time, walltime, 0.0, delta, u);
     if (safe_to_continue && !stop)
     {
         ack_msg.drive.steering_angle = delta;
@@ -199,17 +206,18 @@ int main(int argc, char **argv)
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar/angle_msg", 10);
-    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 1);
+    message_filters::Subscriber<ackermann_msgs::AckermannDriveStamped> safety_sub(n, "racecar/safety", 10);
+    message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar/ttc", 10);
 
     ackermann_pub = n.advertise<ackermann_msgs::AckermannDriveStamped>("vesc/ackermann_cmd_mux/input/teleop", 10);
   
     sub = n.subscribe("obstacle_locations", 1000, obstacle_callback);
 
 
-    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,ackermann_msgs::AckermannDriveStamped,rtreach::stamped_ttc> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub);
-    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub,ttc_sub);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5));
 
 
     while(ros::ok())

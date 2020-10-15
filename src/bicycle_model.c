@@ -84,8 +84,8 @@ bool intermediateState(HyperRectangle* r)
 	r->dims[1].min = r->dims[1].min  + 0.15;
 	r->dims[1].max = r->dims[1].max  - 0.15;
 
-	if(!allowed)
-		printf("unsafe....\n");
+	//if(!allowed)
+	//	printf("unsafe....\n");
 	return allowed;
 }
 

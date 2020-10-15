@@ -55,26 +55,26 @@ bool intermediateState(HyperRectangle* r)
 	//const REAL FIFTEEN_DEGREES_IN_RADIANS = 0.2618;
 
 	// bloat the box for the width of the car
-	r->dims[0].min = r->dims[0].min  - 0.25;
-	r->dims[0].max = r->dims[0].max  + 0.25;
-	r->dims[1].min = r->dims[1].min  - 0.15;
-	r->dims[1].max = r->dims[1].max  + 0.15;
+	// r->dims[0].min = r->dims[0].min  - 0.25;
+	// r->dims[0].max = r->dims[0].max  + 0.25;
+	// r->dims[1].min = r->dims[1].min  - 0.15;
+	// r->dims[1].max = r->dims[1].max  + 0.15;
 
 	
 	
 
-	allowed = check_safety_obstacles(r);
+	// allowed = check_safety_obstacles(r);
 	
-	if(allowed)
-	{
-		allowed = check_safety_wall(r);
-	}
+	// if(allowed)
+	// {
+	// 	allowed = check_safety_wall(r);
+	// }
 	
-	// reset it
-	r->dims[0].min = r->dims[0].min  + 0.25;
-	r->dims[0].max = r->dims[0].max  - 0.25;
-	r->dims[1].min = r->dims[1].min  + 0.15;
-	r->dims[1].max = r->dims[1].max  - 0.15;
+	// // reset it
+	// r->dims[0].min = r->dims[0].min  + 0.25;
+	// r->dims[0].max = r->dims[0].max  - 0.25;
+	// r->dims[1].min = r->dims[1].min  + 0.15;
+	// r->dims[1].max = r->dims[1].max  - 0.15;
 
 	// copy intermediate state into array
 	// add state to array for plotting
