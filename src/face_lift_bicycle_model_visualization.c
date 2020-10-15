@@ -255,7 +255,7 @@ HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, Lifti
 
 	// set the start time
 	struct timeval start;
-	int elapsedTotal;
+	int elapsedTotal =0;
 	gettimeofday(&start, NULL);
 	set_error_print_params(settings);
     HyperRectangle total_hull;
