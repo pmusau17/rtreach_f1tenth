@@ -46,10 +46,10 @@ ros::Publisher vis_pub;
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 1.0;
+double sim_time = 0.5;
 double walltime = 25; // 25 ms corresponds to 40 hz 
 int markers_allocated = 0;
-bool bloat_reachset = false;
+bool bloat_reachset = true;
 double ttc = 0.0;
 
 
@@ -69,7 +69,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,1.5);
+  sim_time = fmin(1.5*ttc,0.5);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;

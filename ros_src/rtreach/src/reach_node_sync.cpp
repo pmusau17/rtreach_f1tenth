@@ -42,7 +42,7 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 1.0;
+double sim_time = 0.5;
 const double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
@@ -63,7 +63,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,1.5);
+  sim_time = fmin(1.5*ttc,0.5);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -110,6 +110,13 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     if(stop && safePeriods>30)
     {
       stop = false;
+    }
+    else if(safety_msg->drive.speed == 0.0)
+    {
+      stop = true;
+      safePeriods=0;
+      ROS_WARN("Safety controller issuing stop command.");
+      
     }
 
     safe_to_continue= runReachability_bicycle(state, sim_time, walltime, 0.0, delta, u);
