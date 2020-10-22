@@ -10,8 +10,6 @@ set autoscale y
 set xrange [0:1.7]
 set yrange [0.0:1.2]
 
-
-
 load "bicycle_initial.gnuplot.txt"
 load "bicycle_final.gnuplot.txt"
 load "bicycle_intermediate.gnuplot.txt"
