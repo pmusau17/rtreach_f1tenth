@@ -366,7 +366,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		stepSize /= 2;
 	}
 	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
-	// DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
 
 	return rv;
 }

@@ -63,6 +63,13 @@ int begin_count = 0;
 double wcet = 0.0;
 
 
+// variable for cumulative moving average
+double count = 0.0;
+double avg_reach_time = 0.0; 
+double new_mean;
+double differential;
+
+
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
 {
   using std::cout;
@@ -140,7 +147,14 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     {
       wcet = reach_time;
     }
-    // cout << "safe_to_continue: " << safe_to_continue << " prev_safe: " << prev_safe << endl;
+
+    // calculate exponential moving average
+    count++;
+    differential = (reach_time - avg_reach_time) / count;
+    new_mean = avg_reach_time + differential;
+    avg_reach_time = new_mean;
+
+
     // detect switches of safe to non-safe
     if(stop != prev_stop)
     {
@@ -316,9 +330,8 @@ int main(int argc, char **argv)
 	
     path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.txt";
     std::ofstream outfile(path.c_str() , std::ios::app);
-    std::string info = 
-    outfile << time_string << " time_taken_lec: " << time_taken_lec << " time_taken_safety_controller: " << time_taken_safety_controller << 
-        " total_time: "<< total_time_taken << " wcet: " << wcet << "\n";
+    outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
+        ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";
     outfile.close();
     
     return 0; 
