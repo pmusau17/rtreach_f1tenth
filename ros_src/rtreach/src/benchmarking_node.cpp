@@ -269,7 +269,9 @@ int main(int argc, char **argv)
 
     // initialize the ros node
     ros::init(argc, argv, "reachnode_sync");
-
+    std::cout << "sleeping" << std::endl;
+    sleep(10);
+    std::cout << "done sleeping" << std:: endl;
     ros::NodeHandle n;
     // ackermann publisher 
     // a description of how the synchronization works can be found here: 

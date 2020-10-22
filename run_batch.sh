@@ -27,7 +27,7 @@ while :
 do
 
 roslaunch race rtreach_batch.launch \
-    timeout:=30 random_seed:=$RANDOM &
+    timeout:=60 random_seed:=$RANDOM &
      
 
 child=$!
