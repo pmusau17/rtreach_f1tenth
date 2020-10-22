@@ -330,7 +330,7 @@ int main(int argc, char **argv)
 	  curr_tm = localtime(&curr_time);
 	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
 	
-    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.txt";
+    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.csv";
     std::ofstream outfile(path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";

@@ -13,7 +13,7 @@
 # something before exiting and/or ignore it.
 
 exit_status=0
-
+count = 0 
 _term() {
   exit_status=$? # = 130 for SIGINT
   echo "Caught SIGINT signal!"
@@ -25,7 +25,7 @@ trap _term SIGINT
 
 while :
 do
-
+((count=count+1)) 
 roslaunch race rtreach_batch.launch \
     timeout:=60 random_seed:=$RANDOM &
      
@@ -39,5 +39,5 @@ if [ $exit_status -eq 130 ]; then
     echo "stop looping"
     break
 fi
-
+echo count: $count
 done
