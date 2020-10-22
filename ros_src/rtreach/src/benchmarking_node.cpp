@@ -15,6 +15,9 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <math.h>
+#include<ctime>
+#include <fstream>
+#include <string>
 
 // The following node will receive messages from the LEC which will be prediction of the steering angle
 // It will also receive messages from the speed node which will dictate how fast the car should travel
@@ -55,8 +58,9 @@ double time_taken_lec = 0.0;
 double time_taken_safety_controller = 0.0;
 bool prev_stop = false;
 bool switched = false;
-clock_t start, end,total_start,total_end;
+clock_t start, end,total_start,total_end, reach_start, reach_end;
 int begin_count = 0;
+double wcet = 0.0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
@@ -72,7 +76,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
   sim_time = fmin(1.5*ttc,0.5);
-  std::cout << "sim_time: " << sim_time << endl;
+  // std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
   y = msg-> pose.pose.position.y;
@@ -126,9 +130,16 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       // ROS_WARN("Safety controller issuing stop command.");
       
     }
-
+    reach_start = clock();
     safe_to_continue= runReachability_bicycle(state, sim_time, walltime, 0.0, delta, u);
+    reach_end = clock();
 
+    double reach_time = double(reach_end - reach_start) / double(CLOCKS_PER_SEC);
+    cout << "reach_time: " << reach_time << endl;
+    if(reach_time>wcet)
+    {
+      wcet = reach_time;
+    }
     // cout << "safe_to_continue: " << safe_to_continue << " prev_safe: " << prev_safe << endl;
     // detect switches of safe to non-safe
     if(stop != prev_stop)
@@ -294,9 +305,21 @@ int main(int argc, char **argv)
     {
         time_taken_lec = time_taken;
     }
-    std::cout << "time_taken_lec: " << time_taken_lec << " time_taken_safety_controller: " << time_taken_safety_controller << 
-        " total_time: "<< total_time_taken << std::endl;
 
-
+    // declaring argument of time() 
+    time_t curr_time;
+	  tm * curr_tm;
+	  char time_string[100];
+    time(&curr_time);
+	  curr_tm = localtime(&curr_time);
+	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
+	
+    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.txt";
+    std::ofstream outfile(path.c_str() , std::ios::app);
+    std::string info = 
+    outfile << time_string << " time_taken_lec: " << time_taken_lec << " time_taken_safety_controller: " << time_taken_safety_controller << 
+        " total_time: "<< total_time_taken << " wcet: " << wcet << "\n";
+    outfile.close();
+    
     return 0; 
 }

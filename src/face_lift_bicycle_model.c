@@ -343,14 +343,11 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 			{
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
-				DEBUG_PRINT("Quitting from runtime maxed out\n\r");
+				// DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 				rv = lastIterationSafe;
 				//println(&trackedRect);
 				break;
 			}
-			// if(!safe)
-			// 	//printf("unsafe\n");
-			// 	println(&hull);
 		} 
 		else
 		{
@@ -368,8 +365,8 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		// apply error-reducing strategy
 		stepSize /= 2;
 	}
-	DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
-	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
+	// DEBUG_PRINT("iterations at quit: %d\n\r", iter);
 
 	return rv;
 }

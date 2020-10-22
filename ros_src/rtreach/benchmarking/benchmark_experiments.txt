@@ -1,0 +1,1 @@
+21/10/2020/22:29:22 time_taken_lec: 0.509594 time_taken_safety_controller: 0 total_time: 0.509594 wcet: 0.051514
