@@ -27,7 +27,7 @@ while :
 do
 ((count=count+1)) 
 roslaunch race rtreach_batch.launch \
-    timeout:=60 random_seed:=$RANDOM &
+    timeout:=60 num_obstacles:=0 random_seed:=$RANDOM &
      
 
 child=$!
