@@ -16,7 +16,7 @@ double ** wallCoords = 0;
 double *** obstacles = 0;
 int file_rows = 0;
 int file_columns = 0;
-int obstacle_count;
+int obstacle_count = 0;
 
 
 // function that allocates the 2d array of wall points

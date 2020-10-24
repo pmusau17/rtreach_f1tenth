@@ -1,3 +1,4 @@
 # ignore object files and shared library files
 *.o 
 *.so 
+*.ipynb_checkpoints
