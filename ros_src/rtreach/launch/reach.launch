@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  
+  <arg name="obstacle_filename" default="porto_obstacles.txt"/>
+  
+  <!--launch pure pursuit node-->
+  <node pkg="rtreach" type="reach_node_sync" name="reach_node" args="$(arg obstacle_filename)" output="screen"/>
+  
+</launch>
