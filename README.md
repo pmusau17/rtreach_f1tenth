@@ -235,12 +235,16 @@ To use the script first source both the rtreach and Platooning-F1Tenth packages 
 
 #### End-to-End Benchmarking 
 ```
-./run_batch
+$ source rtreach_ros/devel/setup.bash
+$ source Platooning-F1Tenth/devel/setup.bash
+$ ./run_batch.sh
 ```
 
 #### RL Benchmarking
 ```
-./run_batch_rl.sh
+$ source rtreach_ros/devel/setup.bash
+$ source Platooning-F1Tenth/devel/setup.bash
+$ ./run_batch_rl.sh
 ```
 
 If a collision occurs during any of the experiments it will be logged along with the random_seed, and number of obstacles so that the scenario can be re-produced. The logs can be found in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/logs).

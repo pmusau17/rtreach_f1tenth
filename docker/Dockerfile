@@ -30,7 +30,7 @@ RUN gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicy
 
 WORKDIR .. 
 
-RUN cp -r ros_src/rtreach/ ../rtreach_ros/src/ && cp run_batch.sh ../rtreach_ros && cp start.sh ../rtreach_ros && cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
+RUN cp -r ros_src/rtreach/ ../rtreach_ros/src/ && cp run_batch.sh run_batch_rl.sh ../rtreach_ros && cp start.sh ../rtreach_ros && cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
 
 WORKDIR ..
 WORKDIR rtreach_ros/
