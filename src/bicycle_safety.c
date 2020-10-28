@@ -16,7 +16,7 @@ double ** wallCoords = 0;
 double *** obstacles = 0;
 int file_rows = 0;
 int file_columns = 0;
-int obstacle_count;
+int obstacle_count = 0;
 
 
 // function that allocates the 2d array of wall points
@@ -145,7 +145,7 @@ bool check_safety_obstacles(HyperRectangle* rect)
         allowed= check_safety(rect,obs);
         if(!allowed)
         {   
-            printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
+            // printf("offending cone [%f, %f], ,[%f, %f]\n",obstacles[j][0][0],obstacles[j][0][1],obstacles[j][1][0],obstacles[j][1][1]);
             break;
         }
 	}
@@ -163,8 +163,8 @@ bool check_safety_wall(HyperRectangle* rect)
         safe = check_safety(rect,point);
         if(!safe)
         {
-            printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
-            println(rect);
+            // printf("offending point (%f,%f)\n",wallCoords[i][0],wallCoords[i][1]);
+            // println(rect);
             break;
         }
     }
