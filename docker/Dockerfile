@@ -20,7 +20,6 @@ RUN rosdep update
 
 # make the repository folder
 RUN mkdir -p ../rtreach_ros/src
-
 # clone the repository
 RUN git clone https://github.com/pmusau17/rtreach_f1tenth.git 
 WORKDIR rtreach_f1tenth/src 
@@ -29,6 +28,7 @@ RUN gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynam
 RUN gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
 
 WORKDIR .. 
+
 
 RUN cp -r ros_src/rtreach/ ../rtreach_ros/src/ && cp run_batch.sh run_batch_rl.sh ../rtreach_ros && cp start.sh ../rtreach_ros && cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
 
