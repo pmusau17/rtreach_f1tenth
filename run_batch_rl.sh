@@ -26,7 +26,7 @@ trap _term SIGINT
 while :
 do
 ((count=count+1)) 
-roslaunch race rtreach_batch_rl.launch \
+roslaunch race sim_for_rtreach_batch_rl.launch \
     timeout:=60 random_seed:=$RANDOM &
      
 

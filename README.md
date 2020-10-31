@@ -178,7 +178,7 @@ $ source devel/setup.bash
 Then start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle. 
 
 ```
-$ roslaunch race rtreach.launch 
+$ roslaunch race sim_for_rtreach.launch 
 ```
 
 The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8). The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
@@ -194,7 +194,7 @@ In this setup the decision manager will allow the neural network model to contro
 
 To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
 
-Arguments that can be provided to the [rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch): 
+Arguments that can be provided to the [sim_for_rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/sim_for_rtreach.launch): 
 - world_name: gazebo world file used to generate environment.
 - model_name: network .hdf5 keras model file. 
 - csv_filename: waypoint file used by pure pursuit algorithm.
@@ -207,7 +207,7 @@ Arguments that can be provided to the [rtreach launch file](https://github.com/p
 Example specification of argument parameter: **argument_name:=value** 
 
 ```
-$ roslaunch race rtreach.launch timeout:=10 
+$ roslaunch race sim_for_rtreach.launch timeout:=10 
 ```
 
 ## Visualizing the Reachable Set
