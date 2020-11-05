@@ -48,6 +48,7 @@ double ttc = 0.0;
 int markers_allocated = 0;
 bool stop = false;
 int safePeriods =0;
+int num_obstacles = 0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
@@ -157,7 +158,7 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
      
     std::vector<visualization_msgs::Marker> markers = marker_msg->markers;
-    int num_obstacles = markers.size();
+    num_obstacles = markers.size();
     double points[num_obstacles][2]; 
     int i;
     for (i = 0; i< num_obstacles;i++)
@@ -168,14 +169,21 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
     if(markers_allocated<1)
     {
-      allocate_obstacles(num_obstacles,points);
+      if(num_obstacles>0)
+      {
+          allocate_obstacles(num_obstacles,points);
+      }
       markers_allocated+=1;
     }
     else
     {
       sub.shutdown();
     }
-    std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    if(num_obstacles>0)
+    {
+        std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    }
+    
 }
 
 
@@ -234,7 +242,10 @@ int main(int argc, char **argv)
 
     // delete the memory allocated to store the wall points
     deallocate_2darr(file_rows,file_columns);
-    deallocate_obstacles(obstacle_count);
+    if(num_obstacles>0)
+    {
+      deallocate_obstacles(obstacle_count);
+    }
 
 
     return 0; 
