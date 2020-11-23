@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   tf
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -215,6 +216,8 @@ add_message_files(
   velocity_msg.msg
   angle_msg.msg
   stamped_ttc.msg
+  interval.msg
+  obstacle_list.msg 
 )
 
 generate_messages(
@@ -237,6 +240,7 @@ include_directories(
 
 FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 FIND_LIBRARY(CUSTOMLIB2 Rtreachvis src/)
+FIND_LIBRARY(CUSTOMLIB3 RtreachDynamicvis src/)
 
 
 add_executable(reach_node src/reach_node_sync.cpp)
@@ -246,6 +250,10 @@ add_dependencies(reach_node rtreach_generate_messages_cpp)
 add_executable(visualize_node src/visualize_reachset.cpp)
 add_dependencies(visualize_node rtreach_generate_messages_cpp)
 target_link_libraries(visualize_node ${catkin_LIBRARIES} ${CUSTOMLIB2})
+
+add_executable(visualize_node_dynamic src/vis_dynamic.cpp)
+add_dependencies(visualize_node_dynamic rtreach_generate_messages_cpp)
+target_link_libraries(visualize_node_dynamic ${catkin_LIBRARIES} ${CUSTOMLIB3})
 
 add_executable(benchmark_node src/benchmarking_node.cpp)
 target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})

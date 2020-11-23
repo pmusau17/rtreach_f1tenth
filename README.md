@@ -96,7 +96,7 @@ First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/201
 
 ```
 $ cd src
-$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
+$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c bicycle_dynamic_safety.c bicycle_model_dynamic_vis.c -lm
 ```
 
 Next create a shared library:
@@ -104,6 +104,7 @@ Next create a shared library:
 ```
 $ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
 $ gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o
+$ gcc -shared -o libRtreachDynamicvis.so face_lift_bicycle_model_visualization.o bicycle_model_dynamic_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_dynamic_safety.o
 ```
 
 This will create a file called **libRtreach.so**. 
@@ -154,7 +155,7 @@ $ cp run_batch.sh run_batch_rl.sh ../rtreach_ros
 Copy the rtreach shared library into the package:
 
 ```
-$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
+$ cp src/libRtreach.so src/libRtreachDynamicvis.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h src/bicycle_dynamic_safety.c  ../rtreach_ros/src/rtreach/src/
 ```
 Build the ros-package.
 ```
