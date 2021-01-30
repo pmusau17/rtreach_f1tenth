@@ -42,7 +42,7 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 const double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
@@ -234,9 +234,10 @@ int main(int argc, char **argv)
     Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub,ttc_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5));
 
-
+    ros::Rate loop_rate(20);
     while(ros::ok())
     {
+      loop_rate.sleep();
       ros::spinOnce();
     }
 

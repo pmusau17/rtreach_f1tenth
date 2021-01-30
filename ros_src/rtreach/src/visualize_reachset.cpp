@@ -46,7 +46,7 @@ ros::Publisher vis_pub;
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 double walltime = 25; // 25 ms corresponds to 40 hz 
 int markers_allocated = 0;
 bool bloat_reachset = true;
@@ -137,10 +137,10 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
       
       marker.pose.position.z = 0.0;
-      marker.pose.orientation.x = 0.0;
-      marker.pose.orientation.y = 0.0;
-      marker.pose.orientation.z = 0.0;
-      marker.pose.orientation.w = 1.0;
+      marker.pose.orientation.x = msg->pose.pose.orientation.x;
+      marker.pose.orientation.y = msg->pose.pose.orientation.y;
+      marker.pose.orientation.z = msg->pose.pose.orientation.z;
+      marker.pose.orientation.w = msg->pose.pose.orientation.w;
       marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
       marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
       marker.scale.z = 0.05;
