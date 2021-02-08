@@ -7,7 +7,13 @@
 
 #include <stdbool.h>
 #include "main.h"
+
+#ifdef OBSTACLE_MODEL
+#include "dynamics_obstacle.h"
+#else
 #include "dynamics_bicycle.h"
+//#error Dynamics File was not defined as compile flag (for example, try -DOBSTACLE_MODEL while compiling)
+#endif
 
 #define NUM_FACES (2 * NUM_DIMS)
 
