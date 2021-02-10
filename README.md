@@ -97,6 +97,8 @@ First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/201
 ```
 $ cd src
 $ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c bicycle_dynamic_safety.c bicycle_model_dynamic_vis.c -lm
+
+$ gcc -c -std=gnu99 -Wall -fpic face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  obstacle_model_plots.c -lm -DOBSTACLE_MODEL
 ```
 
 Compile the dynamic obstacle models:
@@ -105,12 +107,18 @@ Compile the dynamic obstacle models:
 gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  main_obstacle_vis.c obstacle_model_plots.c -lm -o obstacle_plot -DOBSTACLE_MODEL
 ```
 
+
+
+
+
+
 Next create a shared library:
 
 ```
 $ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
 $ gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o
 $ gcc -shared -o libRtreachDynamicvis.so face_lift_bicycle_model_visualization.o bicycle_model_dynamic_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_dynamic_safety.o
+$ gcc -shared -o libRtreachObs.so face_lift_obstacle_visualization.o dynamics_obstacle.o geometry.o interval.o  simulate_obstacle.o util.o obstacle_model_plots.o
 ```
 
 This will create a file called **libRtreach.so**. 
