@@ -366,3 +366,17 @@ dynamics_obstacle.h
 geometry.h
 simulate_obstacle.h
 ```
+
+# Launch sim for friday
+
+```
+roslaunch race multi_parametrizeable.launch number_of_cars:=3
+```
+
+```
+roslaunch race multi_parametrizeable.launch number_of_cars:=2
+```
+
+```
+rosrun rtreach visualize_obs racecar2 2 10 100
+```
