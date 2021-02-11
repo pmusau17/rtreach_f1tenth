@@ -215,6 +215,7 @@ add_message_files(
   FILES
   velocity_msg.msg
   angle_msg.msg
+  reach_tube.msg
   stamped_ttc.msg
   interval.msg
   obstacle_list.msg 
@@ -241,6 +242,7 @@ include_directories(
 FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 FIND_LIBRARY(CUSTOMLIB2 Rtreachvis src/)
 FIND_LIBRARY(CUSTOMLIB3 RtreachDynamicvis src/)
+FIND_LIBRARY(CUSTOMLIB4 RtreachObs src/)
 
 
 add_executable(reach_node src/reach_node_sync.cpp)
@@ -258,3 +260,8 @@ target_link_libraries(visualize_node_dynamic ${catkin_LIBRARIES} ${CUSTOMLIB3})
 add_executable(benchmark_node src/benchmarking_node.cpp)
 target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})
 add_dependencies(benchmark_node rtreach_generate_messages_cpp)
+
+add_executable(visualize_obs src/visualize_obstacle.cpp)
+add_dependencies(visualize_obs rtreach_generate_messages_cpp)
+set_target_properties(visualize_obs PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
+target_link_libraries(visualize_obs ${catkin_LIBRARIES} ${CUSTOMLIB4})

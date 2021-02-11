@@ -1,5 +1,5 @@
-// Stanley Bak
-// 4-2014
+// Patrick Musau
+// 02-2021
 // Geometry header for real-time reach
 
 #ifndef GEOMETRY_H_

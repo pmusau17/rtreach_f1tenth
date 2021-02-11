@@ -329,3 +329,40 @@ Once gazebo and rviz have completed their startup, in a seperate terminal run:
 docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
 ```
 
+# Will Reorganize in a little 
+
+
+### Obstacle Node
+
+```
+$ gcc -std=gnu99 -Wall face_lift_obstacle.c geometry.c interval.c util.c  simulate_obstacle.c dynamics_obstacle.c main_obstacle.c obstacle_model.c -lm -o obstacle -DOBSTACLE_MODEL
+```
+
+```
+./obstacle 10 0 0 1.0 0.0
+```
+
+### Obstacle Visualization
+
+```
+$ gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  main_obstacle_vis.c obstacle_model_plots.c -lm -o obstacle_plot -DOBSTACLE_MODEL
+```
+
+```
+./obstacle_plot 5 0 0 1.0 0.1
+```
+
+# Obstacle C-Library
+
+```
+$ gcc -c -std=gnu99 -Wall -fpic face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  obstacle_model_plots.c -lm -DOBSTACLE_MODEL
+$ gcc -shared -o libRtreachObs.so face_lift_obstacle_visualization.o dynamics_obstacle.o geometry.o interval.o  simulate_obstacle.o util.o obstacle_model_plots.o
+```
+
+# files to add
+
+```
+dynamics_obstacle.h
+geometry.h
+simulate_obstacle.h
+```
