@@ -2,9 +2,6 @@
 #include <ros/package.h>
 #include <ros/console.h>
 
-
-
-
 #include <rtreach/angle_msg.h>
 #include <rtreach/velocity_msg.h>
 #include <rtreach/stamped_ttc.h>
@@ -44,7 +41,7 @@ extern "C"
 ros::Publisher vis_pub; 
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 double walltime = 25; // 25 ms corresponds to 40 hz 
 int markers_allocated = 1;
 bool bloat_reachset = true;
@@ -57,7 +54,7 @@ int num_obstacles = 0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, 
-const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg,const rtreach::obstacle_list::ConstPtr& obs_msg)
+const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)//,const rtreach::obstacle_list::ConstPtr& obs_msg)
 {
   using std::cout;
   using std::endl;
@@ -69,7 +66,7 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,0.5);
+  sim_time = fmin(1.5*ttc,sim_time);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -206,17 +203,17 @@ int main(int argc, char **argv)
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar2/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar2/angle_msg", 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar2/ttc", 10);
-    message_filters::Subscriber<rtreach::obstacle_list> interval_sub(n, "racecar2/obstacles", 10);
+    // message_filters::Subscriber<rtreach::obstacle_list> interval_sub(n, "racecar2/obstacles", 10);
     
 
-    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "reach_hull", 100 );
+    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "racecar2/reach_hull", 100 );
 
 
-    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc, rtreach::obstacle_list> MySyncPolicy;
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc> MySyncPolicy; //, rtreach::obstacle_list> MySyncPolicy;
 
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub,interval_sub);
-    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5));
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub);//,interval_sub);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));//,_5));
 
     ros::Rate r(80);
     while(ros::ok())

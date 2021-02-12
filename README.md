@@ -384,3 +384,5 @@ rosrun rtreach visualize_obs racecar2 2 10 100
 
 ### Param Multi Node (I'll explain next week)
 gcc -std=gnu99 -Wall  face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c main_parametrizeable.c -lm -o bicycle_param
+
+![Multi-agent](images/multi-agent.gif)
