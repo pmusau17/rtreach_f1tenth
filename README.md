@@ -365,6 +365,7 @@ $ gcc -shared -o libRtreachObs.so face_lift_obstacle_visualization.o dynamics_ob
 dynamics_obstacle.h
 geometry.h
 simulate_obstacle.h
+uuv_model_dynamic.h
 ```
 
 # Launch sim for friday
@@ -386,3 +387,6 @@ rosrun rtreach visualize_obs racecar2 2 10 100
 gcc -std=gnu99 -Wall  face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c main_parametrizeable.c -lm -o bicycle_param
 
 ![Multi-agent](images/multi-agent.gif)
+
+gcc -c -std=gnu99 -Wall -fpic face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c -lm 
+gcc -shared -o libRtreachdyn.so face_lift_parametrizeable.o dynamics_bicycle_model.o geometry.o interval.o util.o simulate_bicycle.o bicycle_model_parametrizeable.o
