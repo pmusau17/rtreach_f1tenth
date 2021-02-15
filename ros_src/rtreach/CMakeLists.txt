@@ -268,7 +268,13 @@ set_target_properties(visualize_obs PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
 target_link_libraries(visualize_obs ${catkin_LIBRARIES} ${CUSTOMLIB4})
 
 
-add_executable(reach_node_param src/vis_dynamic_param.cpp)
-add_dependencies(reach_node_param rtreach_generate_messages_cpp)
-add_dependencies(reach_node_param ${catkin_EXPORTED_TARGETS})
-target_link_libraries(reach_node_param  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+add_executable(vis_node_param src/vis_dynamic_param.cpp)
+add_dependencies(vis_node_param rtreach_generate_messages_cpp)
+add_dependencies(vis_node_param ${catkin_EXPORTED_TARGETS})
+target_link_libraries(vis_node_param  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(reach_node_dyn src/reach_node_dynamic.cpp)
+add_dependencies(reach_node_dyn rtreach_generate_messages_cpp)
+add_dependencies(reach_node_dyn ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reach_node_dyn  ${catkin_LIBRARIES} ${CUSTOMLIB5})

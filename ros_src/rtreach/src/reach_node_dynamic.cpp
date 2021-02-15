@@ -27,7 +27,6 @@
 // Initially the assmumption will be the the car moves at constant velocity
 
 const int max_hyper_rectangles = 2000;
-bool debug = false;
 
 extern "C"
 {
@@ -37,14 +36,18 @@ extern "C"
     REAL getSimulatedSafeTime(REAL start[4],REAL heading_input, REAL throttle);
     bool check_safety(HyperRectangle* rect, REAL (*cone)[2]);
     HyperRectangle hr_list2[max_hyper_rectangles];
+    void println(HyperRectangle* r);
 }
 
 
 int count = 0;
 int rect_count = 0;
 bool safe=true;
+bool debug = false;
 
-ros::Publisher vis_pub;
+//ros::Publisher res_pub;    // publisher for reachability results
+//ros::ServiceClient client; // obstacle_service client
+//rtreach::obstacle_list srv;// service call
 rtreach::reach_tube static_obstacles;
 double sim_time;
 double state[4] = {0.0,0.0,0.0,0.0};
@@ -61,8 +64,48 @@ int display_count = 1;
 double display_increment = 1.0;
 
 
+
+// Naive O(N^2) check
+bool check_obstacle_safety(rtreach::reach_tube obs,HyperRectangle VisStates[],int rect_count)
+{   
+    bool safe = true;
+    HyperRectangle hull;
+    double cone[2][2] = {{0.0,0.0},{0.0,0.0}};
+    std::cout << "obs_count: " << obs.count << ", rect_count: "<< rect_count << std::endl;
+    for (int i=0;i<obs.count;i++)
+    {
+        if(!safe)
+        {
+            break;
+        }
+        cone[0][0] = obs.obstacle_list[i].x_min;
+        cone[0][1] = obs.obstacle_list[i].x_max;
+        cone[1][0] = obs.obstacle_list[i].y_min;
+        cone[1][1] = obs.obstacle_list[i].y_max;
+        for(int j = 0; j<rect_count;j++)
+        {
+
+            hull = VisStates[j];
+            hull.dims[0].min = hull.dims[0].min  - 0.25;
+            hull.dims[0].max = hull.dims[0].max  + 0.25;
+            hull.dims[1].min = hull.dims[1].min  - 0.15;
+            hull.dims[1].max = hull.dims[1].max  + 0.15;
+
+            safe = check_safety(&hull,cone);
+            if(!safe)
+            {   
+                break;
+            }
+        }
+    }
+    return safe;
+}
+
+
+
+
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, 
-const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
+const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg,const rtreach::reach_tube::ConstPtr& obs1, const rtreach::reach_tube::ConstPtr& obs2)//,const rtreach::obstacle_list::ConstPtr& obs_msg)
 {
     using std::cout;
     using std::endl;
@@ -76,9 +119,7 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
     // the lookahead time should be dictated by the lookahead time
     // since the car is moving at 1 m/s the max sim time is 1.5 seconds
     sim_time = fmin(1.5*ttc,sim_time);
-    
-    if(debug)
-        std::cout << "sim_time: " << sim_time << endl;
+    std::cout << "sim_time: " << sim_time << endl;
 
     x = msg-> pose.pose.position.x;
     y = msg-> pose.pose.position.y;
@@ -103,25 +144,17 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
     tf::Vector3 speed = tf::Vector3(msg->twist.twist.linear.x, msg->twist.twist.linear.x, 0.0);
     lin_speed = speed.length();
 
-    if(debug)
-    {
-        cout << "x: " << x;
-        cout << " y: " << y;
-        cout << " yaw: " << yaw;
-        cout << " speed: " << lin_speed << endl;
-    }
-  
+    cout << "x: " << x;
+    cout << " y: " << y;
+    cout << " yaw: " << yaw;
+    cout << " speed: " << lin_speed << endl;
 
 
     u = velocity_msg->velocity;
     delta = angle_msg->steering_angle;
 
-    if(debug)
-    {
-        cout << "u: " << u << endl; 
-        cout << "delta: " << delta << endl;
-    }
-    
+    cout << "u: " << u << endl; 
+    cout << "delta: " << delta << endl;
 
     state[0] = x;
     state[1] = y;
@@ -129,58 +162,20 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
     state[3] = yaw;
 
     runReachability_bicycle_dyn(state, sim_time, wall_time, 0,delta,u,hr_list2,&rect_count,max_hyper_rectangles,true);
+    printf("num_boxes: %d, obs1 count: %d, obs2 count: %d, \n",rect_count,obs1->count,obs2->count);
 
-    if(debug)
-        printf("num_boxes: %d, \n",rect_count);
-    visualization_msgs::MarkerArray ma;
-    display_increment = rect_count  / display_max;
-    display_count = std::max(1.0,nearbyint(display_increment));
-    
-    if(debug)
-        cout <<  "display_max: " << display_increment  << ", display count: " << display_count << endl;
-
-    // allocate markers
-    for(int i= 0; i<std::min(max_hyper_rectangles-1,rect_count-1); i+=display_increment)
+    // do the safety checking between the dynamic obstacles here
+    if(obs1->count>0)
     {
-        
-        hull = hr_list2[i];
-        if(bloat_reachset)
-        {
-            hull.dims[0].min = hull.dims[0].min  - 0.25;
-            hull.dims[0].max = hull.dims[0].max  + 0.25;
-            hull.dims[1].min = hull.dims[1].min  - 0.15;
-            hull.dims[1].max = hull.dims[1].max  + 0.15;
-        }
-        
-        visualization_msgs::Marker marker;
-        marker.header.frame_id = "/map";
-        marker.header.stamp = ros::Time::now();
-        marker.id = i;
-        marker.type = visualization_msgs::Marker::CUBE;
-        marker.action = visualization_msgs::Marker::ADD;
-        marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
-        marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
-        marker.pose.position.z = 0.5; 
-        marker.pose.orientation.x = qx;
-        marker.pose.orientation.y = qy;
-        marker.pose.orientation.z = qz;
-        marker.pose.orientation.w = qw;
-        marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
-        marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
-        marker.scale.z = 0.05;
-        marker.color.a = 1.0; 
-        marker.color.r = 0.0; //(double) rand() / (RAND_MAX);
-        marker.color.g = 0.0; //(double) rand() / (RAND_MAX);
-        marker.color.b = 0.8; //(double) rand() / (RAND_MAX);
-        marker.lifetime =ros::Duration(0.5); 
-        ma.markers.push_back(marker);
+        safe  = check_obstacle_safety(*obs1,hr_list2,std::min(max_hyper_rectangles,rect_count));
+         
+    }
+    if(obs2->count>0 && safe)
+    {
+        safe  = check_obstacle_safety(*obs2,hr_list2,std::min(max_hyper_rectangles,rect_count));
     }
 
-    vis_pub.publish(ma);
-
-
-
-
+    printf("safe: %d\n",safe);
 }
 
 
@@ -231,29 +226,26 @@ int main(int argc, char **argv)
     // as there are numerous boxes computed within the reachability computation, we must limit the number
     // we send to rviz
     display_max = atof(argv[3]);
-
-    // visualization publisher
-    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "racecar2/reach_hull_param", 100 );
-
-
-    
+ 
     // Initialize the list of subscribers 
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar2/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar2/velocity_msg", 10);
     message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar2/angle_msg", 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar2/ttc", 10);
+    message_filters::Subscriber<rtreach::reach_tube> obs1(n,"racecar/reach_tube",10);
+    message_filters::Subscriber<rtreach::reach_tube> obs2(n,"racecar3/reach_tube",10);
 
 
     // message synchronizer 
-    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc> MySyncPolicy; 
+    typedef sync_policies::ApproximateTime<nav_msgs::Odometry, rtreach::velocity_msg, rtreach::angle_msg,rtreach::stamped_ttc,rtreach::reach_tube,rtreach::reach_tube> MySyncPolicy; 
 
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub);//,interval_sub);
-    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4));
-
+    Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,ttc_sub,obs1,obs2);//,interval_sub);
+    sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5,_6));
 
     while(ros::ok())
     {
+      // call service periodically 
       ros::spinOnce();
     }
     return 0; 
