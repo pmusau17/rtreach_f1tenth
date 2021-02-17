@@ -383,10 +383,19 @@ rosrun rtreach visualize_obs racecar2 2 10 100
 ```
 
 
-### Param Multi Node (I'll explain next week)
-gcc -std=gnu99 -Wall  face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c main_parametrizeable.c -lm -o bicycle_param
+### Multi-Agent Reachability
 
 ![Multi-agent](images/multi-agent.gif)
 
+To enable reachability regimes within the context of dynamic obstacles and multiple agents we need a way to send the hyper-rectangles on the ROS network. Additionally we need to set an upper limit on the number of hyper-rectangles used to represent the reachable set. This is what the following code implements.
+
+Compile the example (explain more):
+``` 
+gcc -std=gnu99 -Wall  face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c main_parametrizeable.c -lm -o bicycle_param
+```
+
+Compile the Shared library
+```
 gcc -c -std=gnu99 -Wall -fpic face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c -lm 
 gcc -shared -o libRtreachdyn.so face_lift_parametrizeable.o dynamics_bicycle_model.o geometry.o interval.o util.o simulate_bicycle.o bicycle_model_parametrizeable.o
+```
