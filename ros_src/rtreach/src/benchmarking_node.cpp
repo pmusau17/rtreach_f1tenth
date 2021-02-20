@@ -86,7 +86,8 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,1.0);
+  // sim_time = fmax(fmin(1.5*ttc,1.0),0.7);
+  sim_time = 1.0;
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -320,7 +321,7 @@ int main(int argc, char **argv)
 	  curr_tm = localtime(&curr_time);
 	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
 	
-    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.csv";
+    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments_worlds.csv";
     std::ofstream outfile(path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";
