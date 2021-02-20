@@ -340,20 +340,6 @@ rosrun rtreach visualize_obs racecar 1.0 2.0 100
 ```
 
 
-
-```
-roslaunch race multi_parametrizeable.launch number_of_cars:=3
-```
-
-```
-roslaunch race multi_parametrizeable.launch number_of_cars:=2
-```
-
-```
-rosrun rtreach visualize_obs racecar2 2 10 100
-```
-
-
 # Multi-Agent Reachability
 
 ![Multi-agent](images/multi-agent.gif)
