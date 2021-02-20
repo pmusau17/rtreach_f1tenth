@@ -69,7 +69,7 @@ void timer_callback(const ros::TimerEvent& event)
   double roll, pitch, yaw;
   double x,y,vx,vy;
   
-  sim_time = 2.0;
+  //sim_time = 2.0;
   rect_count = 0;
   HyperRectangle hull;
   

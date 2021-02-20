@@ -66,7 +66,8 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,sim_time);
+  // sim_time = fmin(1.5*ttc,sim_time);
+  sim_time = 1.0;
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
