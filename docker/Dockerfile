@@ -22,19 +22,12 @@ RUN rosdep update
 RUN mkdir -p ../rtreach_ros/src
 # clone the repository
 RUN git clone https://github.com/pmusau17/rtreach_f1tenth.git 
-WORKDIR rtreach_f1tenth/src 
-RUN gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
-RUN gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
-RUN gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
+WORKDIR rtreach_f1tenth/
+RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && ./build_rtreach.sh"
 
 WORKDIR .. 
 
 
-RUN cp -r ros_src/rtreach/ ../rtreach_ros/src/ && cp run_batch.sh run_batch_rl.sh ../rtreach_ros && cp start.sh ../rtreach_ros && cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
-
-WORKDIR ..
 WORKDIR rtreach_ros/
-RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && catkin_make"
-RUN chmod +x start.sh
-WORKDIR ..
-CMD ["rtreach_ros/start.sh"]
+CMD /bin/bash -c "source devel/setup.bash && rosrun rtreach reach_node porto_obstacles.txt"
+
