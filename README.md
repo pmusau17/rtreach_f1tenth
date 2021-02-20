@@ -92,7 +92,7 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 
 ![Block Diagram](images/rtreach.png)
 
-First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
+First compile the code and create the rospackage, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
 $ cd src
@@ -106,10 +106,6 @@ Compile the dynamic obstacle models:
 ```
 gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  main_obstacle_vis.c obstacle_model_plots.c -lm -o obstacle_plot -DOBSTACLE_MODEL
 ```
-
-
-
-
 
 
 Next create a shared library:
@@ -150,35 +146,16 @@ If that test worked, smile, take a breath and let's have some fun with ROS. If n
 
 The platform that we seek to use these techniques on is a 1/10 scale autonomous race car named the [F1Tenth](https://f1tenth.org/). The platform was inspired as an international competition for researchers, engineers, and autonomous systems enthusiasts originally founded ath University of Pennsylvania in 2016. Our initial implmentation is done in simulation but we are also planning on doing this on the hardware platform. Thus, This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
 
-Once that is installed, create the ros package: 
+Once that is installed, create the ros package:
 
 ```
-$ cd ..
-$ mkdir -p ../rtreach_ros/src
+$ ./build_rtreach.sh
 ```
 
-Create the ros-nodes into the package created above:
+This will create a ros package called rtreach_ros in the directory above this one. Run the following command to use the package
 
 ```
-$ cp -r ros_src/rtreach/ ../rtreach_ros/src/
-```
-
-```
-$ cp run_batch.sh run_batch_rl.sh ../rtreach_ros
-```
-Copy the rtreach shared library into the package:
-
-```
-$ cp src/libRtreach.so src/libRtreachDynamicvis.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h src/bicycle_dynamic_safety.c  ../rtreach_ros/src/rtreach/src/
-```
-Build the ros-package.
-```
-$ cd ../rtreach_ros && catkin_make
-```
-and then: 
-
-```
-$ source devel/setup.bash
+cd ../rtreach_ros && source devel/setup.bash
 ```
 
 ### Running Rtreach
@@ -230,7 +207,7 @@ $ roslaunch race sim_for_rtreach.launch timeout:=10
 You can visualize the reachable set by running the following: 
 
 ```
-$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 80
+$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 10
 ```
 
 Usage: 
@@ -329,10 +306,10 @@ Once gazebo and rviz have completed their startup, in a seperate terminal run:
 docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
 ```
 
-# Will Reorganize in a little 
+# Computing Reachsets for Dynamic Obstacles
 
-
-### Obstacle Node
+The obstacle tracking problem is a well studied and challenging topic within the autonomous vehicle, computer vision, and robotics literature
+Typically some assumptions are required in order to constrain the tracking problem to best suit the context of the application. In our framework we assumed that the obstacles could be described a two dimensional kinematic model and a corresponding bounding box. The code below implements reachability using this model
 
 ```
 $ gcc -std=gnu99 -Wall face_lift_obstacle.c geometry.c interval.c util.c  simulate_obstacle.c dynamics_obstacle.c main_obstacle.c obstacle_model.c -lm -o obstacle -DOBSTACLE_MODEL
@@ -344,6 +321,8 @@ $ gcc -std=gnu99 -Wall face_lift_obstacle.c geometry.c interval.c util.c  simula
 
 ### Obstacle Visualization
 
+To visualize the reachsets using a two-dimensional kinematic model: 
+
 ```
 $ gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  main_obstacle_vis.c obstacle_model_plots.c -lm -o obstacle_plot -DOBSTACLE_MODEL
 ```
@@ -352,21 +331,27 @@ $ gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c 
 ./obstacle_plot 5 0 0 1.0 0.1
 ```
 
-# Obstacle C-Library
+# Using this model within the Simulator. 
 
+As an example, if we assume that the F1Tenth model can be described by a two-dimensional kinematic model, then the reachability analysis code takes the following form: 
+
+In two seperate terminals run the following: 
+
+**Make sure to source PlatooningF1Tenth/devel/setup.bash**
+
+Terminal 1:
 ```
-$ gcc -c -std=gnu99 -Wall -fpic face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  obstacle_model_plots.c -lm -DOBSTACLE_MODEL
-$ gcc -shared -o libRtreachObs.so face_lift_obstacle_visualization.o dynamics_obstacle.o geometry.o interval.o  simulate_obstacle.o util.o obstacle_model_plots.o
+roslaunch race sim_for_rtreach.launch
 ```
 
-# Options for Running rtreach
+**Make sure to source rtreach_ros/devel/setup.bash**
 
+Terminal 2: 
 ```
-rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 1.0
 rosrun rtreach visualize_obs racecar 1.0 2.0 100
 ```
 
-# Launch sim for friday
+
 
 ```
 roslaunch race multi_parametrizeable.launch number_of_cars:=3
@@ -387,7 +372,15 @@ rosrun rtreach visualize_obs racecar2 2 10 100
 
 To enable reachability regimes within the context of dynamic obstacles and multiple agents we need a way to send the hyper-rectangles on the ROS network. Additionally we need to set an upper limit on the number of hyper-rectangles used to represent the reachable set. This is what the following code implements.
 
-Running multi-agent nodes
+To launch such a simulation run the following
+
+```
+$ source rtreach_ros/devel/setup.bash
+$ source Platooning-F1Tenth/devel/setup.bash
+$ roslaunch race sim_for_rtreach_multi_agent.launch
+```
+
+Multi-agent nodes
 
 ```
 rosrun rtreach reach_node_dyn 1.0 2.0 100 1
