@@ -23,7 +23,7 @@ RUN mkdir -p ../rtreach_ros/src
 # clone the repository
 RUN git clone https://github.com/pmusau17/rtreach_f1tenth.git 
 WORKDIR rtreach_f1tenth/
-RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash && ./build_rtreach.sh"
+RUN /bin/bash -c "git pull && source /opt/ros/kinetic/setup.bash && ./build_rtreach.sh"
 
 WORKDIR .. 
 

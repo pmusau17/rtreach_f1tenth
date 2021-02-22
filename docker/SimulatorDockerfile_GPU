@@ -75,4 +75,4 @@ RUN apt-get install -y ros-kinetic-gazebo-ros-pkgs
 RUN pip install torch torchvision
 RUN pip install future
 
-CMD /bin/bash -c "source devel/setup.bash && roslaunch race sim_for_rtreach.launch verbose:=true gui:=false"
+CMD /bin/bash -c "source devel/setup.bash && roslaunch race sim_for_rtreach.launch verbose:=true gui:=true"
