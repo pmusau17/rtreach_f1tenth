@@ -18,9 +18,17 @@ else
   world='0'
 fi
 
+# Change this to select the algorithm
+# 0 is e2e image 1 is e2e porto training, 2 is SAC, 3 is ddpg, 4 is e2e all tracks
+algorithm_number=0
+
+# Select the velocity for evaluation 
+velocity=1.0
+
+# this keeps track of how many experiments we have run
+count=0
 
 exit_status=0
-count = 0 
 _term() {
   exit_status=$? # = 130 for SIGINT
   echo "Caught SIGINT signal!"
@@ -30,10 +38,10 @@ _term() {
 
 trap _term SIGINT
 
-while :
+while [ $count -lt 30 ]
 do
 ((count=count+1)) 
-roslaunch race sim_for_rtreach_batch_worlds.launch world_number:=$world
+roslaunch race sim_for_rtreach_batch_worlds.launch world_number:=$world algorithm:=$algorithm_number velocity:=$velocity timeout:=60 &
      
 
 child=$!

@@ -240,11 +240,42 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
+    std::string controller_name, racetrack, speed;
     
     if(argv[1] == NULL)
     {
         std::cout << "Please provide the file containing the obstacle locations (i.e porto_obstacles.txt)" << std::endl;
         exit(0);
+    }
+
+    // controller name 
+    if(argv[2] == NULL)
+    {
+        controller_name = "";
+    }
+    else
+    {
+      controller_name = "_"+(std::string)argv[2]; 
+    }
+
+    // racetrack name
+    if(argv[3] == NULL)
+    {
+        racetrack="";
+    }
+    else
+    {
+       racetrack = "_"+(std::string)argv[3];
+    }
+
+    // speed name
+    if(argv[4] == NULL)
+    {
+        speed="";
+    }
+    else
+    {
+      speed= "_"+(std::string)argv[4];
     }
    
     std::string filename = argv[1];
@@ -321,7 +352,7 @@ int main(int argc, char **argv)
 	  curr_tm = localtime(&curr_time);
 	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
 	
-    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments_worlds.csv";
+    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
     std::ofstream outfile(path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";
