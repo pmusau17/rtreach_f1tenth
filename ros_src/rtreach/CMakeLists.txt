@@ -278,3 +278,15 @@ add_executable(reach_node_dyn src/reach_node_dynamic.cpp)
 add_dependencies(reach_node_dyn rtreach_generate_messages_cpp)
 add_dependencies(reach_node_dyn ${catkin_EXPORTED_TARGETS})
 target_link_libraries(reach_node_dyn  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(reach_node_hardware src/reach_node_hardware.cpp)
+add_dependencies(reach_node_hardware rtreach_generate_messages_cpp)
+add_dependencies(reach_node_hardware ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reach_node_hardware  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(visualize_hardware src/visualize_hardware.cpp)
+add_dependencies(visualize_hardware rtreach_generate_messages_cpp)
+add_dependencies(visualize_hardware ${catkin_EXPORTED_TARGETS})
+target_link_libraries(visualize_hardware  ${catkin_LIBRARIES} ${CUSTOMLIB5})
