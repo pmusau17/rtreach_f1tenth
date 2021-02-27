@@ -44,6 +44,7 @@ int count = 0;
 int rect_count = 0;
 bool safe=true;
 bool debug = false;
+ros::Publisher res_pub;
 
 //ros::Publisher res_pub;    // publisher for reachability results
 //ros::ServiceClient client; // obstacle_service client
@@ -175,7 +176,9 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
     {
         safe  = check_obstacle_safety(*obs2,hr_list2,std::min(max_hyper_rectangles,rect_count));
     }
-
+    std_msgs::Float32 res_msg;
+    res_msg.data = (double)safe;
+    res_pub.publish(res_msg);
     printf("safe: %d\n",safe);
 }
 
@@ -235,6 +238,7 @@ int main(int argc, char **argv)
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar2/ttc", 10);
     message_filters::Subscriber<rtreach::reach_tube> obs1(n,"racecar/reach_tube",10);
     message_filters::Subscriber<rtreach::reach_tube> obs2(n,"racecar3/reach_tube",10);
+    res_pub = n.advertise<std_msgs::Float32>("reachability_result", 10);
 
 
     // message synchronizer 
