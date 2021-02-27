@@ -46,11 +46,12 @@ ros::Publisher vis_pub;
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 double walltime = 25; // 25 ms corresponds to 40 hz 
 int markers_allocated = 0;
 bool bloat_reachset = true;
 double ttc = 0.0;
+int num_obstacles = 0;
 
 
 
@@ -69,7 +70,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,0.5);
+  // sim_time = fmin(1.5*ttc,0.5);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -136,10 +137,10 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
       
       marker.pose.position.z = 0.0;
-      marker.pose.orientation.x = 0.0;
-      marker.pose.orientation.y = 0.0;
-      marker.pose.orientation.z = 0.0;
-      marker.pose.orientation.w = 1.0;
+      marker.pose.orientation.x = msg->pose.pose.orientation.x;
+      marker.pose.orientation.y = msg->pose.pose.orientation.y;
+      marker.pose.orientation.z = msg->pose.pose.orientation.z;
+      marker.pose.orientation.w = msg->pose.pose.orientation.w;
       marker.scale.x = (hull.dims[0].max-hull.dims[0].min);
       marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
       marker.scale.z = 0.05;
@@ -162,7 +163,7 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
      
     std::vector<visualization_msgs::Marker> markers = marker_msg->markers;
-    int num_obstacles = markers.size();
+    num_obstacles = markers.size();
     double points[num_obstacles][2]; 
     int i;
     for (i = 0; i< num_obstacles;i++)
@@ -173,14 +174,21 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
     if(markers_allocated<1)
     {
-      allocate_obstacles(num_obstacles,points);
+      if(num_obstacles>0)
+      {
+          allocate_obstacles(num_obstacles,points);
+      }
       markers_allocated+=1;
     }
     else
     {
       sub.shutdown();
     }
-    std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    if(num_obstacles>0)
+    {
+        std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    }
+    
 }
 
 
@@ -260,7 +268,10 @@ int main(int argc, char **argv)
 
     // delete the memory allocated to store the wall points
     deallocate_2darr(file_rows,file_columns);
-    deallocate_obstacles(obstacle_count);
+    if(num_obstacles>0)
+    {
+      deallocate_obstacles(obstacle_count);
+    }
 
 
     return 0; 

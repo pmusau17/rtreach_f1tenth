@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
   tf
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -214,7 +215,10 @@ add_message_files(
   FILES
   velocity_msg.msg
   angle_msg.msg
+  reach_tube.msg
   stamped_ttc.msg
+  interval.msg
+  obstacle_list.msg 
 )
 
 generate_messages(
@@ -237,6 +241,9 @@ include_directories(
 
 FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 FIND_LIBRARY(CUSTOMLIB2 Rtreachvis src/)
+FIND_LIBRARY(CUSTOMLIB3 RtreachDynamicvis src/)
+FIND_LIBRARY(CUSTOMLIB4 RtreachObs src/)
+FIND_LIBRARY(CUSTOMLIB5 Rtreachdyn src/)
 
 
 add_executable(reach_node src/reach_node_sync.cpp)
@@ -247,6 +254,39 @@ add_executable(visualize_node src/visualize_reachset.cpp)
 add_dependencies(visualize_node rtreach_generate_messages_cpp)
 target_link_libraries(visualize_node ${catkin_LIBRARIES} ${CUSTOMLIB2})
 
+add_executable(visualize_node_dynamic src/vis_dynamic.cpp)
+add_dependencies(visualize_node_dynamic rtreach_generate_messages_cpp)
+target_link_libraries(visualize_node_dynamic ${catkin_LIBRARIES} ${CUSTOMLIB3})
+
 add_executable(benchmark_node src/benchmarking_node.cpp)
 target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})
 add_dependencies(benchmark_node rtreach_generate_messages_cpp)
+
+add_executable(visualize_obs src/visualize_obstacle.cpp)
+add_dependencies(visualize_obs rtreach_generate_messages_cpp)
+set_target_properties(visualize_obs PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
+target_link_libraries(visualize_obs ${catkin_LIBRARIES} ${CUSTOMLIB4})
+
+
+add_executable(vis_node_param src/vis_dynamic_param.cpp)
+add_dependencies(vis_node_param rtreach_generate_messages_cpp)
+add_dependencies(vis_node_param ${catkin_EXPORTED_TARGETS})
+target_link_libraries(vis_node_param  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(reach_node_dyn src/reach_node_dynamic.cpp)
+add_dependencies(reach_node_dyn rtreach_generate_messages_cpp)
+add_dependencies(reach_node_dyn ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reach_node_dyn  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(reach_node_hardware src/reach_node_hardware.cpp)
+add_dependencies(reach_node_hardware rtreach_generate_messages_cpp)
+add_dependencies(reach_node_hardware ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reach_node_hardware  ${catkin_LIBRARIES} ${CUSTOMLIB5})
+
+
+add_executable(visualize_hardware src/visualize_hardware.cpp)
+add_dependencies(visualize_hardware rtreach_generate_messages_cpp)
+add_dependencies(visualize_hardware ${catkin_EXPORTED_TARGETS})
+target_link_libraries(visualize_hardware  ${catkin_LIBRARIES} ${CUSTOMLIB5})

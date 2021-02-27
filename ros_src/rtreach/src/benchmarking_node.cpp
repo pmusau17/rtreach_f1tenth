@@ -45,7 +45,7 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 const double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
@@ -70,6 +70,9 @@ double avg_reach_time = 0.0;
 double new_mean;
 double differential;
 
+int lec_count = 0;
+int safety_count = 0;
+
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
 {
@@ -83,8 +86,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,0.5);
-  // std::cout << "sim_time: " << sim_time << endl;
+  // sim_time = fmax(fmin(1.5*ttc,1.0),0.7);
+  sim_time = 1.0;
+  std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
   y = msg-> pose.pose.position.y;
@@ -119,6 +123,9 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   if(markers_allocated>0)
   {
     ackermann_msgs::AckermannDriveStamped ack_msg;
+
+    // start the clock to keep track of whether the lec is operating or the 
+    // safety controller is operating
     if(begin_count<1)
     {
         start = clock();
@@ -127,10 +134,11 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     }
         
   
-    if(stop && safePeriods>30)
+    if(stop && safePeriods>50)
     {
       stop = false;
     }
+    // if the safety controller issues a stop command we should stop
     else if(safety_msg->drive.speed == 0.0)
     {
       stop = true;
@@ -138,6 +146,8 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       // ROS_WARN("Safety controller issuing stop command.");
       
     }
+
+    // do the timing for the reachability 
     reach_start = clock();
     safe_to_continue= runReachability_bicycle(state, sim_time, walltime, 0.0, delta, u);
     reach_end = clock();
@@ -156,37 +166,6 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     avg_reach_time = new_mean;
 
 
-    // detect switches of safe to non-safe
-    if(stop != prev_stop)
-    {
-        switched = true; 
-    }    
-    
-    // store current decision    
-    if(switched)
-    {
-        ROS_WARN("Switch Occured,Switch Occured,Switch Occured,Switch Occured...");
-        switched = false;
-        // reset the clock to start logging the new controller
-        end = clock();
-        double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
-        if(!stop)
-        {
-            time_taken_safety_controller += time_taken;
-        }
-        else
-        {
-            time_taken_lec = time_taken;
-        }
-        // cout << "time taken: " << time_taken << endl;
-        start = clock();
-       
-    }
-    
-        
-
-
-
     // main loop
     if (safe_to_continue && !stop)
     {
@@ -194,6 +173,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
         ack_msg.drive.speed = u;
         ack_msg.header.stamp = ros::Time::now();
         ackermann_pub.publish(ack_msg);
+        lec_count++;
     }
         
     else
@@ -206,6 +186,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
         ROS_WARN("using safety controller.");
         cout << "using safety controller...safe?: " << safe_to_continue << endl; 
         stop = true;
+        safety_count++;
     }
 
     if(stop & safe_to_continue)
@@ -216,7 +197,6 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     {
       safePeriods = 0;
     }
-    prev_stop = stop;
   }
   
 }
@@ -260,11 +240,42 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
+    std::string controller_name, racetrack, speed;
     
     if(argv[1] == NULL)
     {
         std::cout << "Please provide the file containing the obstacle locations (i.e porto_obstacles.txt)" << std::endl;
         exit(0);
+    }
+
+    // controller name 
+    if(argv[2] == NULL)
+    {
+        controller_name = "";
+    }
+    else
+    {
+      controller_name = "_"+(std::string)argv[2]; 
+    }
+
+    // racetrack name
+    if(argv[3] == NULL)
+    {
+        racetrack="";
+    }
+    else
+    {
+       racetrack = "_"+(std::string)argv[3];
+    }
+
+    // speed name
+    if(argv[4] == NULL)
+    {
+        speed="";
+    }
+    else
+    {
+      speed= "_"+(std::string)argv[4];
     }
    
     std::string filename = argv[1];
@@ -322,17 +333,16 @@ int main(int argc, char **argv)
     // complete time logging
     end = clock();
     total_end = end; 
-    double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
+    // double time_taken = double(end - start) / double(CLOCKS_PER_SEC);
     double total_time_taken = double(total_end - total_start) / double(CLOCKS_PER_SEC);
 
-    if(stop)
-    {
-        time_taken_safety_controller += time_taken;
-    }
-    else
-    {
-        time_taken_lec = time_taken;
-    }
+
+    int total_periods = lec_count+safety_count;
+    //std::cout << "The total number of messages was: " << total_periods <<  std::endl; 
+    //std::cout << "lec %: " << double(lec_count)/double(total_periods) << "safety %: " << double(safety_count)/double(total_periods) << std::endl;
+
+    time_taken_lec = (double(lec_count)/double(total_periods))*total_time_taken;
+    time_taken_safety_controller = (double(safety_count)/double(total_periods))*total_time_taken;
 
     // declaring argument of time() 
     time_t curr_time;
@@ -342,7 +352,7 @@ int main(int argc, char **argv)
 	  curr_tm = localtime(&curr_time);
 	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
 	
-    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments.csv";
+    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
     std::ofstream outfile(path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";

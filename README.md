@@ -92,18 +92,17 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 
 ![Block Diagram](images/rtreach.png)
 
-First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
+First compile the code and create the rospackage, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
 $ cd src
-$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
+$ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c bicycle_dynamic_safety.c bicycle_model_dynamic_vis.c -lm
 ```
 
 Next create a shared library:
 
 ```
 $ gcc -shared -o libRtreach.so face_lift_bicycle_model.o bicycle_model.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o 
-$ gcc -shared -o libRtreachvis.so face_lift_bicycle_model_visualization.o bicycle_model_vis.o dynamics_bicycle_model.o geometry.o interval.o  simulate_bicycle.o util.o bicycle_safety.o
 ```
 
 This will create a file called **libRtreach.so**. 
@@ -135,35 +134,16 @@ If that test worked, smile, take a breath and let's have some fun with ROS. If n
 
 The platform that we seek to use these techniques on is a 1/10 scale autonomous race car named the [F1Tenth](https://f1tenth.org/). The platform was inspired as an international competition for researchers, engineers, and autonomous systems enthusiasts originally founded ath University of Pennsylvania in 2016. Our initial implmentation is done in simulation but we are also planning on doing this on the hardware platform. Thus, This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
 
-Once that is installed, create the ros package: 
+Once that is installed, create the ros package:
 
 ```
-$ cd ..
-$ mkdir -p ../rtreach_ros/src
+$ ./build_rtreach.sh
 ```
 
-Create the ros-nodes into the package created above:
+This will create a ros package called rtreach_ros in the directory above this one. Run the following command to use the package
 
 ```
-$ cp -r ros_src/rtreach/ ../rtreach_ros/src/
-```
-
-```
-$ cp run_batch.sh run_batch_rl.sh ../rtreach_ros
-```
-Copy the rtreach shared library into the package:
-
-```
-$ cp src/libRtreach.so src/libRtreachvis.so src/bicycle_safety.h src/geometry.h src/main.h src/dynamics_bicycle.h src/simulate_bicycle_plots.h ../rtreach_ros/src/rtreach/src/
-```
-Build the ros-package.
-```
-$ cd ../rtreach_ros && catkin_make
-```
-and then: 
-
-```
-$ source devel/setup.bash
+cd ../rtreach_ros && source devel/setup.bash
 ```
 
 ### Running Rtreach
@@ -178,7 +158,7 @@ $ source devel/setup.bash
 Then start the simulation. This will bring up the track displayed at the start of this readme and a green model of a simplistic autonomous vehicle. 
 
 ```
-$ roslaunch race rtreach.launch 
+$ roslaunch race sim_for_rtreach.launch 
 ```
 
 The neural network inspired controller that we use in our experiments maps images captured from the vehicle's camera into one of five discrete actions (turn left, turn right, continue straight, turn weakly left, turn weakly right). The network model used to make inferences is [VGG-7](https://towardsdatascience.com/only-numpy-implementing-mini-vgg-vgg-7-and-softmax-layer-with-interactive-code-8994719bcca8). The safe controller is a gap following algorithm that we select because of its ability to avoid obstacles. 
@@ -194,7 +174,7 @@ In this setup the decision manager will allow the neural network model to contro
 
 To select a different set of weights for the neural network, you can specify the model .hdf5 in the [rtreach.launch](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch) file. The available .hdf5 files are listed in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/tree/master/src/computer_vision/models). You are also free to train your own!
 
-Arguments that can be provided to the [rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/rtreach.launch): 
+Arguments that can be provided to the [sim_for_rtreach launch file](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/launch/sim_for_rtreach.launch): 
 - world_name: gazebo world file used to generate environment.
 - model_name: network .hdf5 keras model file. 
 - csv_filename: waypoint file used by pure pursuit algorithm.
@@ -207,7 +187,7 @@ Arguments that can be provided to the [rtreach launch file](https://github.com/p
 Example specification of argument parameter: **argument_name:=value** 
 
 ```
-$ roslaunch race rtreach.launch timeout:=10 
+$ roslaunch race sim_for_rtreach.launch timeout:=10 
 ```
 
 ## Visualizing the Reachable Set
@@ -215,7 +195,7 @@ $ roslaunch race rtreach.launch timeout:=10
 You can visualize the reachable set by running the following: 
 
 ```
-$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 80
+$ rosrun rtreach visualize_node porto_obstacles.txt 1 2.0 10
 ```
 
 Usage: 
@@ -314,3 +294,69 @@ Once gazebo and rviz have completed their startup, in a seperate terminal run:
 docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
 ```
 
+# Computing Reachsets for Dynamic Obstacles
+
+The obstacle tracking problem is a well studied and challenging topic within the autonomous vehicle, computer vision, and robotics literature
+Typically some assumptions are required in order to constrain the tracking problem to best suit the context of the application. In our framework we assumed that the obstacles could be described a two dimensional kinematic model and a corresponding bounding box. The code below implements reachability using this model
+
+```
+$ gcc -std=gnu99 -Wall face_lift_obstacle.c geometry.c interval.c util.c  simulate_obstacle.c dynamics_obstacle.c main_obstacle.c obstacle_model.c -lm -o obstacle -DOBSTACLE_MODEL
+```
+
+```
+./obstacle 10 0 0 1.0 0.0
+```
+
+### Obstacle Visualization
+
+To visualize the reachsets using a two-dimensional kinematic model: 
+
+```
+$ gcc -std=gnu99 -Wall face_lift_obstacle_visualization.c geometry.c interval.c util.c  simulate_obstacle.c  dynamics_obstacle.c  main_obstacle_vis.c obstacle_model_plots.c -lm -o obstacle_plot -DOBSTACLE_MODEL
+```
+
+```
+./obstacle_plot 5 0 0 1.0 0.1
+```
+
+### Using this model within the Simulator. 
+
+As an example, if we assume that the F1Tenth model can be described by a two-dimensional kinematic model, then the reachability analysis code takes the following form: 
+
+In two seperate terminals run the following: 
+
+**Make sure to source PlatooningF1Tenth/devel/setup.bash**
+
+Terminal 1:
+```
+roslaunch race sim_for_rtreach.launch
+```
+
+**Make sure to source rtreach_ros/devel/setup.bash**
+
+Terminal 2: 
+```
+rosrun rtreach visualize_obs racecar 1.0 2.0 100
+```
+
+
+# Multi-Agent Reachability
+
+![Multi-agent](images/multi-agent.gif)
+
+To enable reachability regimes within the context of dynamic obstacles and multiple agents we need a way to send the hyper-rectangles on the ROS network. Additionally we need to set an upper limit on the number of hyper-rectangles used to represent the reachable set. This is what the following code implements.
+
+To launch such a simulation run the following
+
+```
+$ source rtreach_ros/devel/setup.bash
+$ source Platooning-F1Tenth/devel/setup.bash
+$ roslaunch race sim_for_rtreach_multi_agent.launch
+```
+
+Multi-agent nodes
+
+```
+rosrun rtreach reach_node_dyn 1.0 2.0 100 1
+rosrun rtreach vis_node_param 1.0 2.0 100 1
+```

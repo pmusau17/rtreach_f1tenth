@@ -3,3 +3,4 @@
 *.so 
 *.ipynb_checkpoints
 *.catkin_workspace
+*__pycache__

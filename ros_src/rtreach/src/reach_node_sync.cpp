@@ -42,12 +42,13 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 0.5;
+double sim_time = 1.0;
 const double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
 bool stop = false;
 int safePeriods =0;
+int num_obstacles = 0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
@@ -63,7 +64,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   
   // the lookahead time should be dictated by the lookahead time
   // since the car is moving at 1 m/s the max sim time is 1.5 seconds
-  sim_time = fmin(1.5*ttc,0.5);
+  // sim_time = fmin(1.5*ttc,0.5);
   std::cout << "sim_time: " << sim_time << endl;
 
   x = msg-> pose.pose.position.x;
@@ -157,7 +158,7 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
      
     std::vector<visualization_msgs::Marker> markers = marker_msg->markers;
-    int num_obstacles = markers.size();
+    num_obstacles = markers.size();
     double points[num_obstacles][2]; 
     int i;
     for (i = 0; i< num_obstacles;i++)
@@ -168,14 +169,21 @@ void obstacle_callback(const visualization_msgs::MarkerArray::ConstPtr& marker_m
 
     if(markers_allocated<1)
     {
-      allocate_obstacles(num_obstacles,points);
+      if(num_obstacles>0)
+      {
+          allocate_obstacles(num_obstacles,points);
+      }
       markers_allocated+=1;
     }
     else
     {
       sub.shutdown();
     }
-    std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    if(num_obstacles>0)
+    {
+        std::cout << obstacles[0][0][0] <<", " << obstacles[0][0][1] << std::endl;
+    }
+    
 }
 
 
@@ -226,15 +234,19 @@ int main(int argc, char **argv)
     Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), odom_sub, vel_sub,angle_sub,safety_sub,ttc_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2,_3,_4,_5));
 
-
+    ros::Rate loop_rate(20);
     while(ros::ok())
     {
+      loop_rate.sleep();
       ros::spinOnce();
     }
 
     // delete the memory allocated to store the wall points
     deallocate_2darr(file_rows,file_columns);
-    deallocate_obstacles(obstacle_count);
+    if(num_obstacles>0)
+    {
+      deallocate_obstacles(obstacle_count);
+    }
 
 
     return 0; 
