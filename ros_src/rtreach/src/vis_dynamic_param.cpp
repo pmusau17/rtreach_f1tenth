@@ -59,6 +59,7 @@ int num_obstacles = 0;
 double display_max;
 int display_count = 1;
 double display_increment = 1.0;
+int color_topic = 0;
 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, 
@@ -169,10 +170,29 @@ const rtreach::angle_msg::ConstPtr& angle_msg, const rtreach::stamped_ttc::Const
         marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
         marker.scale.z = 0.05;
         marker.color.a = 1.0; 
-        marker.color.r = 0.0; //(double) rand() / (RAND_MAX);
-        marker.color.g = 0.0; //(double) rand() / (RAND_MAX);
-        marker.color.b = 0.8; //(double) rand() / (RAND_MAX);
-        marker.lifetime =ros::Duration(0.5); 
+
+        if(color_topic==0)
+        {
+            marker.color.r = 0.0; //(double) rand() / (RAND_MAX);
+            marker.color.g = 0.0; //(double) rand() / (RAND_MAX);
+            marker.color.b = 0.8; //(double) rand() / (RAND_MAX);
+        }
+        else if(color_topic==1)
+        {
+            marker.color.r = 0.0; //(double) rand() / (RAND_MAX);
+            marker.color.g = 0.8; //(double) rand() / (RAND_MAX);
+            marker.color.b = 0.0; //(double) rand() / (RAND_MAX);
+        }
+        else
+        {
+            marker.color.r = 0.8; //(double) rand() / (RAND_MAX);
+            marker.color.g = 0.0; //(double) rand() / (RAND_MAX);
+            marker.color.b = 0.0; //(double) rand() / (RAND_MAX);
+        }
+        
+
+        
+        marker.lifetime =ros::Duration(0.1); 
         ma.markers.push_back(marker);
     }
 
@@ -193,7 +213,11 @@ int main(int argc, char **argv)
     using namespace message_filters;
     int num_dynamic_obstacles;
     // initialize the ros node
-    ros::init(argc, argv, "reach_node_param");
+    ros::init(argc, argv, "reach_node_param",ros::init_options::AnonymousName);
+
+    // controller topics
+    std::string controller_topic;
+    std::string result_topic = "racecar2/reach_hull_param";
     
     ros::NodeHandle n;
     
@@ -216,12 +240,29 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    if(argv[4] == NULL)
+    if(argc >4)
     {
-        debug = false;
+        debug = (bool)atoi(argv[4]);
     }
     else
-        debug = (bool)atoi(argv[4]);
+        debug = false;
+        
+
+    if(argc >5)
+    {
+        controller_topic = argv[5];
+        result_topic = controller_topic+"/reachability_hull";
+    }
+    else
+    {
+        controller_topic="racecar2/angle_msg";
+    }
+
+
+    if(argc >6)
+    {
+        color_topic = atoi(argv[6]);
+    }
 
 
     // wall-time is how long we want the reachability algorithm to run
@@ -233,14 +274,14 @@ int main(int argc, char **argv)
     display_max = atof(argv[3]);
 
     // visualization publisher
-    vis_pub = n.advertise<visualization_msgs::MarkerArray>( "racecar2/reach_hull_param", 100 );
+    vis_pub = n.advertise<visualization_msgs::MarkerArray>( result_topic, 100 );
 
 
     
     // Initialize the list of subscribers 
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar2/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar2/velocity_msg", 10);
-    message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar2/angle_msg", 10);
+    message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, controller_topic, 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar2/ttc", 10);
 
 

@@ -195,8 +195,10 @@ int main(int argc, char **argv)
 
     using namespace message_filters;
     int num_dynamic_obstacles;
+    std::string controller_topic;
+    std::string result_topic = "reachability_result";
     // initialize the ros node
-    ros::init(argc, argv, "reach_node_param");
+    ros::init(argc, argv, "reach",ros::init_options::AnonymousName);
     
     ros::NodeHandle n;
     
@@ -219,12 +221,26 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    if(argv[4] == NULL)
+    if(argc <4)
     {
         debug = false;
     }
     else
         debug = (bool)atoi(argv[4]);
+
+
+    if(argc<5)
+    {
+        controller_topic = "racecar2/angle_msg";
+    }
+    else
+    {
+        controller_topic = argv[5];
+        result_topic = controller_topic+"/reachability_result";
+        if(controller_topic=="racecar2/angle_msg")
+            result_topic ="reachability_result";
+    }
+    std::cout << controller_topic << result_topic << std::endl;
 
 
     // wall-time is how long we want the reachability algorithm to run
@@ -238,12 +254,12 @@ int main(int argc, char **argv)
     // Initialize the list of subscribers 
     message_filters::Subscriber<nav_msgs::Odometry> odom_sub(n, "racecar2/odom", 10);
     message_filters::Subscriber<rtreach::velocity_msg> vel_sub(n, "racecar2/velocity_msg", 10);
-    message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, "racecar2/angle_msg", 10);
+    message_filters::Subscriber<rtreach::angle_msg> angle_sub(n, controller_topic, 10);
     message_filters::Subscriber<rtreach::stamped_ttc> ttc_sub(n, "racecar2/ttc", 10);
     message_filters::Subscriber<rtreach::reach_tube> obs1(n,"racecar/reach_tube",10);
     message_filters::Subscriber<rtreach::reach_tube> obs2(n,"racecar3/reach_tube",10);
     message_filters::Subscriber<rtreach::reach_tube> wall(n,"wallpoints",10);
-    res_pub = n.advertise<std_msgs::Float32>("reachability_result", 10);
+    res_pub = n.advertise<std_msgs::Float32>(result_topic, 10);
 
 
     // message synchronizer 
