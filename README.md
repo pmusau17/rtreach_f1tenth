@@ -296,7 +296,7 @@ docker container run -it --name=rtreach_ntainer  --rm --net=host rtreach
 
 # Computing Reachsets for Dynamic Obstacles
 
-The obstacle tracking problem is a well studied and challenging topic within the autonomous vehicle, computer vision, and robotics literature
+The obstacle tracking problem is a well studied and challenging topic within the autonomous vehicle, computer vision, and robotics literature. 
 Typically some assumptions are required in order to constrain the tracking problem to best suit the context of the application. In our framework we assumed that the obstacles could be described a two dimensional kinematic model and a corresponding bounding box. The code below implements reachability using this model
 
 ```
@@ -360,3 +360,21 @@ Multi-agent nodes
 rosrun rtreach reach_node_dyn 1.0 2.0 100 1
 rosrun rtreach vis_node_param 1.0 2.0 100 1
 ```
+
+# Running the Multi-Agent Experiments in Docker
+
+To run the multi-agent experiments, open two terminals and run the following: 
+
+```
+./docker/launch_docker_sim.sh
+```
+
+To change the number of vehicles open the above bash script and change number of cars from 2 to 3.
+
+In the second terminal run: 
+
+```
+./docker/launch_multi_agent.sh
+```
+
+
