@@ -71,6 +71,7 @@ double avg_reach_time = 0.0;
 double avg_iterations = 0.0;
 double new_mean;
 double differential;
+double itq;
 
 int lec_count = 0;
 int safety_count = 0;
@@ -169,9 +170,11 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
 
     // calculate exponential moving average of iterations
 
+    itq = (double)iterations_at_quit;
     differential = (iterations_at_quit-avg_iterations) / count;
     new_mean = avg_iterations+differential;
     avg_iterations = new_mean;
+    cout << "avg_iterations: " << avg_iterations << endl;
 
 
     // main loop
@@ -249,6 +252,8 @@ int main(int argc, char **argv)
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
     std::string controller_name, racetrack, speed;
+    std::string save_path; 
+    bool regular_name = false;
     
     if(argv[1] == NULL)
     {
@@ -257,9 +262,9 @@ int main(int argc, char **argv)
     }
 
     // controller name 
-    if(argv[2] == NULL)
+    if(argc <3 || argv[2] == NULL)
     {
-        controller_name = "";
+        regular_name = true;
     }
     else
     {
@@ -267,9 +272,9 @@ int main(int argc, char **argv)
     }
 
     // racetrack name
-    if(argv[3] == NULL)
+    if(argc <4 || argv[3] == NULL)
     {
-        racetrack="";
+        regular_name = true;
     }
     else
     {
@@ -277,9 +282,9 @@ int main(int argc, char **argv)
     }
 
     // speed name
-    if(argv[4] == NULL)
+    if(argc <5 || argv[4] == NULL)
     {
-        speed="";
+        regular_name = true;
     }
     else
     {
@@ -287,9 +292,15 @@ int main(int argc, char **argv)
     }
    
     std::string filename = argv[1];
+    if(regular_name)
+      save_path = path +"/benchmarking/"+"benchmark_experiments.csv";
+    else
+      save_path = path +"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
 
+    ROS_WARN("%s",save_path.c_str());
     path = path + "/obstacles/"+filename;
     load_wallpoints(path.c_str(),true);
+    
 
 
     using namespace message_filters;
@@ -360,8 +371,7 @@ int main(int argc, char **argv)
 	  curr_tm = localtime(&curr_time);
 	  strftime(time_string, 50, "%d/%m/%Y/%T", curr_tm);
 	
-    path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
-    std::ofstream outfile(path.c_str() , std::ios::app);
+    std::ofstream outfile(save_path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "," << avg_iterations << "\n";
     outfile.close();
