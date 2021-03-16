@@ -28,6 +28,9 @@ bool final_hull = false;
 int total_intermediate = 0;
 int num_intermediate = 0;
 
+// for benchmarking purposes having the iterations at quit is huge
+int iterations_at_quit = 0;
+
 
 // Constants necessary to guarantee loop termination.
 // These bound the values of the derivatives
@@ -386,6 +389,7 @@ HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, Lifti
 	}
 	DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	iterations_at_quit = iter;
     printf("safe: %d\n",rv);
 	return total_hull;
 }

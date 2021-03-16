@@ -65,7 +65,7 @@ int main( int argc, const char* argv[] )
 
     // run reachability analysis test 
 	bool safe = runReachability_bicycle_dyn(startState, timeToSafe, runtimeMs, startMs,delta,u,hr_list,&rects,max_hyper_rectangles,plot_all);
-
+    DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
     DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 
     // // print the hull 

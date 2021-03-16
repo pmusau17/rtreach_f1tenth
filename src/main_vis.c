@@ -72,7 +72,7 @@ int main( int argc, const char* argv[] )
 
     // run reachability analysis test 
 	HyperRectangle reach_hull = runReachability_bicycle_vis(startState, timeToSafe, runtimeMs, startMs,delta,u);
-
+    DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
 	printf("\n");
     printf("num VisStates: %d\n",num_intermediate);
     printf("total encountered intermediate: %d\n",total_intermediate);

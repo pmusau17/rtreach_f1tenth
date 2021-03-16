@@ -22,6 +22,8 @@ bool face_lifting_iterative_improvement_obstacle(int startMs, LiftingSettings* s
 REAL get_derivative_bounds_obstacle(HyperRectangle* rect, int faceIndex, REAL v_x, REAL v_y);
 
 
+// for benchmarking purposes having the iterations at quit is huge
+int iterations_at_quit = 0;
 
 // Constants necessary to guarantee loop termination.
 // These bound the values of the derivatives
@@ -368,6 +370,7 @@ bool face_lifting_iterative_improvement_obstacle(int startMs, LiftingSettings* s
 	}
 	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	iterations_at_quit = iter;
 
 	return rv;
 }

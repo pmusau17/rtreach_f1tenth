@@ -9,8 +9,10 @@
 
 #include "main.h"
 #include "geometry.h"
-#include "dynamics.h"
+//#include "dynamics.h"
 
+
+extern int iterations_at_quit;
 typedef struct LiftingSettings
 {
 	HyperRectangle init;

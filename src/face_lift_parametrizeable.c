@@ -20,6 +20,9 @@ REAL get_derivative_bounds_bicycle(HyperRectangle* rect, int faceIndex,REAL head
 const REAL MAX_DER_B = 99999;
 const REAL MIN_DER_B = -99999;
 
+// for benchmarking purposes having the iterations at quit is huge
+int iterations_at_quit = 0;
+
 // make a face's neighborhood of a given width
 // At each dimension, there are two faces corresponding to that dimension, minimum_face and maximum_face
 // For example, Rect: 0 <= x <= 2: the minimum_face is at x = 0 (a point in this case), the maximum_face is at x = 2
@@ -370,6 +373,7 @@ bool face_lifting_iterative_improvement_bicycle_dyn(int startMs, LiftingSettings
 	}
 	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
 	// DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	iterations_at_quit = iter;
 
 	return rv;
 }

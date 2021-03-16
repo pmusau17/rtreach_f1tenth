@@ -50,6 +50,7 @@ int main(int argc, char** argv)
     	// run reachability analysis test 
     	HyperRectangle hull = runReachability_bicycle_vis(startState, reachTime, ms, milliseconds(),delta,u);
 		println(&hull);
+	    DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
 	}
 
 	return rv;

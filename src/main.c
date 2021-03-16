@@ -70,7 +70,7 @@ int main( int argc, const char* argv[] )
     // run reachability analysis test 
 	bool safe = runReachability_bicycle(startState, timeToSafe, runtimeMs, startMs,delta,u);
 	//int runtimeMs = 20; // run for 20 milliseconds
-
+	DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
 	DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 	deallocate_2darr(file_rows,file_columns);
 	deallocate_obstacles(obstacle_count);

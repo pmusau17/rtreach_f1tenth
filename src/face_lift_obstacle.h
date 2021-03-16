@@ -10,6 +10,7 @@
 #include "main.h"
 #include "geometry.h"
 
+extern int iterations_at_quit;
 typedef struct LiftingSettings
 {
 	HyperRectangle init;

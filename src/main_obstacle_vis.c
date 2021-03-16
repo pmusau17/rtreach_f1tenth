@@ -67,7 +67,9 @@ int main( int argc, const char* argv[] )
 
     // run reachability analysis test 
 	HyperRectangle reach_hull = runReachability_obstacle_vis(startState, timeToSafe, runtimeMs, startMs,v_x,v_y,hr_list,&rects,max_hyper_rectangles,plot_all);
+	DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
 	HyperRectangle reach_hull2 = runReachability_obstacle_vis(startState, timeToSafe, runtimeMs, startMs,v_x+0.1,v_y+0.1,hr_list2,&rects2,max_hyper_rectangles,plot_all);
+	DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
     // DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 
 

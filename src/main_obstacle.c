@@ -60,7 +60,7 @@ int main( int argc, const char* argv[] )
     DEBUG_PRINT("done, result = %s\n", safe ? "safe" : "unsafe");
 
 
-    
+    DEBUG_PRINT("Number of Iterations: %d\n",iterations_at_quit);
     // // print the hull 
 	// println(&reach_hull);
 	// deallocate_2darr(file_rows,file_columns);

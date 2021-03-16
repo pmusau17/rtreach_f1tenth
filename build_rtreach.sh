@@ -24,7 +24,7 @@ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 cp run_batch_rl.sh run_batch.sh run_batch_worlds.sh ../rtreach_ros
 
 # copy all the neccessary header files and library files into the rospackage
-cp src/libRtreachDynamicvis.so  src/libRtreachdyn.so  src/libRtreachObs.so  src/libRtreach.so  src/libRtreachvis.so src/bicycle_dynamic_safety.h  src/bicycle_model_parametrizeable.h  src/bicycle_safety.h  src/dynamics_bicycle.h  src/dynamics_obstacle.h  src/geometry.h  src/main.h  src/simulate_bicycle_plots.h  src/simulate_obstacle.h ../rtreach_ros/src/rtreach/src/
+cp src/libRtreachDynamicvis.so  src/libRtreachdyn.so  src/libRtreachObs.so  src/libRtreach.so  src/libRtreachvis.so src/bicycle_dynamic_safety.h  src/bicycle_model_parametrizeable.h  src/bicycle_safety.h  src/dynamics_bicycle.h  src/dynamics_obstacle.h  src/geometry.h  src/main.h src/face_lift.h src/simulate_bicycle_plots.h  src/simulate_obstacle.h ../rtreach_ros/src/rtreach/src/
 
 pushd ../rtreach_ros
 catkin_make

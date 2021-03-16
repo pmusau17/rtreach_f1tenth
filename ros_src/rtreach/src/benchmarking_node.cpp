@@ -26,6 +26,7 @@
 extern "C"
 { 
      #include "bicycle_safety.h"
+     #include "face_lift.h"
      bool runReachability_bicycle(double * start, double  simTime, double  wallTimeMs, double  startMs,double  heading_input, double  throttle);
      void deallocate_2darr(int rows,int columns);
      void load_wallpoints(const char * filename, bool print);
@@ -67,6 +68,7 @@ double wcet = 0.0;
 // variable for cumulative moving average
 double count = 0.0;
 double avg_reach_time = 0.0; 
+double avg_iterations = 0.0;
 double new_mean;
 double differential;
 
@@ -164,6 +166,12 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     differential = (reach_time - avg_reach_time) / count;
     new_mean = avg_reach_time + differential;
     avg_reach_time = new_mean;
+
+    // calculate exponential moving average of iterations
+
+    differential = (iterations_at_quit-avg_iterations) / count;
+    new_mean = avg_iterations+differential;
+    avg_iterations = new_mean;
 
 
     // main loop
@@ -355,7 +363,7 @@ int main(int argc, char **argv)
     path = ros::package::getPath("rtreach")+"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
     std::ofstream outfile(path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
-        ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "\n";
+        ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "," << avg_iterations << "\n";
     outfile.close();
     
     return 0; 
