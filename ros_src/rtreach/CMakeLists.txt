@@ -262,6 +262,10 @@ add_executable(benchmark_node src/benchmarking_node.cpp)
 target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})
 add_dependencies(benchmark_node rtreach_generate_messages_cpp)
 
+add_executable(benchmark_node_dyn src/benchmark_dynamic.cpp)
+target_link_libraries(benchmark_node_dyn ${catkin_LIBRARIES} ${CUSTOMLIB5})
+add_dependencies(benchmark_node_dyn rtreach_generate_messages_cpp)
+
 add_executable(visualize_obs src/visualize_obstacle.cpp)
 add_dependencies(visualize_obs rtreach_generate_messages_cpp)
 set_target_properties(visualize_obs PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
