@@ -20,11 +20,11 @@
 
 
 # Change this to select the algorithm fot evaluate
-# 0 is dave, 1 is lidar e2e, 3 is SAC, 4 is ARS
-algorithm_number=0
+# 0 is dave, 1 is lidar e2e, 2 is SAC, 3 is ARS
+algorithm_number=3
 
 # 0 is porto, 1 is racecar_walker, 2 is barca
-world_number=0 
+world_number=0
 
 # ignore this
 exit_status=0
@@ -46,7 +46,7 @@ trap _term SIGINT
 while [ $count -lt 30 ]
 do
 ((count=count+1)) 
-roslaunch race sim_for_rtreach_batch_emsoft.launch  algorithm:=$algorithm_number velocity:=$velocity experiment_number:=$count world_number:=$world_number timeout:=60 & 
+roslaunch race sim_for_rtreach_batch_emsoft.launch  algorithm:=$algorithm_number velocity:=$velocity world_number:=$world_number experiment_number:=$count timeout:=60 & 
 
 
     
