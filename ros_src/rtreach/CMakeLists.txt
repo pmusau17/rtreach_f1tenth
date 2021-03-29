@@ -262,6 +262,13 @@ add_executable(benchmark_node src/benchmarking_node.cpp)
 target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})
 add_dependencies(benchmark_node rtreach_generate_messages_cpp)
 
+
+add_executable(benchmark_hardware_node src/benchmarking_node_hardware.cpp)
+target_link_libraries(benchmark_hardware_node ${catkin_LIBRARIES} ${CUSTOMLIB})
+add_dependencies(benchmark_hardware_node rtreach_generate_messages_cpp)
+
+
+
 add_executable(benchmark_node_dyn src/benchmark_dynamic.cpp)
 target_link_libraries(benchmark_node_dyn ${catkin_LIBRARIES} ${CUSTOMLIB5})
 add_dependencies(benchmark_node_dyn rtreach_generate_messages_cpp)
