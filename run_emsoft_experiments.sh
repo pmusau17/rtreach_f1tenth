@@ -21,7 +21,7 @@
 
 # Change this to select the algorithm fot evaluate
 # 0 is dave, 1 is lidar e2e, 2 is SAC, 3 is ARS
-algorithm_number=3
+algorithm_number=1
 
 # 0 is porto, 1 is racecar_walker, 2 is barca
 world_number=0

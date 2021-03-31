@@ -258,6 +258,8 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	REAL stepSize = settings->initialStepSize;
 
 	int iter = 0; // number of iterations
+	int previous_iter =0;
+	int elapsed_prev = 0;
 
 	while (true)
 	{
@@ -332,16 +334,22 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		  // it continues until the simulation time is over, or we encounter an unsafe state,
 		  // whichever occurs first. 
 
+
+		// Don't do another iteration unless you want to miss the deadline
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
+		previous_iter = elapsedTotal - elapsed_prev;
+		elapsed_prev = elapsedTotal;
+		// DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d\n\r", elapsedTotal,previous_iter);
+
 
 		
 
 		if (settings->maxRuntimeMilliseconds > 0)
 		{
-			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal;
+			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal -previous_iter;
 
-			if (remaining < 0)
+			if (remaining <= previous_iter)
 			{
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
@@ -370,7 +378,7 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 
 	iterations_at_quit = iter;
 	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
-	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	// DEBUG_PRINT("iterations at quit: %d\n\r", iter);
 
 	return rv;
 }
