@@ -52,6 +52,10 @@ int markers_allocated = 0;
 bool bloat_reachset = true;
 double ttc = 0.0;
 int num_obstacles = 0;
+double display_max = 10;
+int display_count = 1;
+double display_increment = 1.0;
+int disp_counter = 0;
 
 
 
@@ -113,8 +117,11 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
   {
     hull = runReachability_bicycle_vis(state, sim_time, walltime, 0, delta, u);
     printf("num_boxes: %d, ",num_intermediate);
+    display_increment = num_intermediate / display_max;
+    display_count = std::max(1.0,nearbyint(display_increment));
     visualization_msgs::MarkerArray ma;
-    for(int i = 0; i<num_intermediate;i++)
+    disp_counter = 0;
+    for(int i = 0; i<num_intermediate;i+=display_increment)
     {
       hull = VisStates[i];
 
@@ -135,6 +142,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       marker.action = visualization_msgs::Marker::ADD;
       marker.pose.position.x = (hull.dims[0].max+hull.dims[0].min)/2.0;
       marker.pose.position.y = (hull.dims[1].max+hull.dims[1].min)/2.0;
+      marker.pose.position.z = disp_counter*0.05;
       
       marker.pose.position.z = 0.0;
       marker.pose.orientation.x = msg->pose.pose.orientation.x;
@@ -145,11 +153,22 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
       marker.scale.z = 0.05;
       marker.color.a = 1.0; 
-      marker.color.r = (double) rand() / (RAND_MAX);
-      marker.color.g = (double) rand() / (RAND_MAX);
-      marker.color.b = (double) rand() / (RAND_MAX);
+      if(disp_counter % 2 ==0)
+      {
+         marker.color.r = 0.0;//(double) rand() / (RAND_MAX);
+         marker.color.g = 1.0;//(double) rand() / (RAND_MAX);
+         marker.color.b = 0.0;//(double) rand() / (RAND_MAX);
+      }
+      else
+      {
+         marker.color.r = 0.0;//(double) rand() / (RAND_MAX);
+         marker.color.g = 0.0;//(double) rand() / (RAND_MAX);
+         marker.color.b = 1.0;//(double) rand() / (RAND_MAX);
+      }
+     
       marker.lifetime =ros::Duration(0.1); 
       ma.markers.push_back(marker);
+      disp_counter++;
     }
 
     // publish marker
