@@ -147,7 +147,28 @@ If that test worked, smile, take a breath and let's have some fun with ROS. If n
 
 The platform that we seek to use these techniques on is a 1/10 scale autonomous race car named the [F1Tenth](https://f1tenth.org/). The platform was inspired as an international competition for researchers, engineers, and autonomous systems enthusiasts originally founded ath University of Pennsylvania in 2016. Our initial implmentation is done in simulation but we are also planning on doing this on the hardware platform. Thus, This assumes that you have the F1Tenth Simulator installed. If not please install it by following the instructions available [here](https://github.com/pmusau17/Platooning-F1Tenth).
 
-Once that is installed, create the ros package:
+### Overlaying worskpaces
+<hr /> 
+Once that is installed. You have to add the setup script to your ~/.bashrc file. This allows you to [overlay workspaces](http://wiki.ros.org/catkin/Tutorials/workspace_overlaying). Using your favourite editor add the following line to your ~/.bashrc. I like gedit or nano (vim lovers just relax). 
+
+```
+gedit ~/.bashrc
+```
+add this to the bottom of that file
+
+```
+source /path/to/Platooning-F1Tenth/setup.bash
+```
+
+**change the path above to reflect the one on your machine**.
+
+
+Then run 
+```
+$ source ~/.bashrc
+```
+
+You're now all set to build rtreach. In the rtreach_f1tenth/ folder run the following: 
 
 ```
 $ ./build_rtreach.sh
