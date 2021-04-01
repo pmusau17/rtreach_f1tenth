@@ -339,6 +339,8 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
 		previous_iter = elapsedTotal - elapsed_prev;
+		// its O(N^2) in terms of box checking so have to scale the next iteration by sqrt(2)
+		previous_iter = ceil(previous_iter * 1.41421356237);
 		elapsed_prev = elapsedTotal;
 		// DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d\n\r", elapsedTotal,previous_iter);
 
