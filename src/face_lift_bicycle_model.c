@@ -258,8 +258,9 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	REAL stepSize = settings->initialStepSize;
 
 	int iter = 0; // number of iterations
-	int previous_iter =0;
+	int previous_iter =1;
 	int elapsed_prev = 0;
+	int next_iter_estimate = 0;
 
 	while (true)
 	{
@@ -339,19 +340,23 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
 		previous_iter = elapsedTotal - elapsed_prev;
-		// its O(N^2) in terms of box checking so have to scale the next iteration by sqrt(2)
-		previous_iter = ceil(previous_iter * 1.41421356237);
+		if(previous_iter==0)
+			next_iter_estimate = 2;
+		else
+			next_iter_estimate = previous_iter * 2+1;
+		// its O(2^N) in terms of box checking so have to scale the next iteration by 2
+		//previous_iter = ceil(previous_iter * 1.41421356237);
 		elapsed_prev = elapsedTotal;
-		// DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d\n\r", elapsedTotal,previous_iter);
+		DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d, projected_next_iter: %d\n\r", elapsedTotal,previous_iter,next_iter_estimate);
 
 
 		
 
 		if (settings->maxRuntimeMilliseconds > 0)
 		{
-			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal -previous_iter;
+			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal;
 
-			if (remaining <= previous_iter)
+			if (remaining <= next_iter_estimate)
 			{
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
