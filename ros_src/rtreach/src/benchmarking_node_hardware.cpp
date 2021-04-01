@@ -46,7 +46,7 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 1.0;
+double sim_time = 1.5;
 const double walltime = 25; // 25 ms corresponds to 40 hz
 int markers_allocated = 0;
 bool stop = false;

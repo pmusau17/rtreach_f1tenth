@@ -46,8 +46,8 @@ ros::Publisher ackermann_pub; // control command publisher
 ros::Subscriber sub; // markerArray subscriber
 
 // reachability parameters
-double sim_time = 1.0;
-const double walltime = 25; // 25 ms corresponds to 40 hz
+double sim_time = 1.5;
+double walltime = 25; // 25 ms corresponds to 40 hz
 double ttc = 0.0;
 int markers_allocated = 0;
 bool stop = false;
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
-    std::string controller_name, racetrack, speed;
+    std::string controller_name, racetrack, speed, wall_str;
     std::string save_path; 
     bool regular_name = false;
     
@@ -290,12 +290,23 @@ int main(int argc, char **argv)
     {
       speed= "_"+(std::string)argv[4];
     }
+
+    if(argc < 6 || argv[5]==NULL)
+    {
+      walltime = 25;
+      wall_str="_25";
+    }
+    else 
+    {
+      walltime = atoi(argv[5]);
+      wall_str="_"+(std::string)argv[5];
+    }
    
     std::string filename = argv[1];
     if(regular_name)
       save_path = path +"/benchmarking/"+"benchmark_experiments.csv";
     else
-      save_path = path +"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+".csv";
+      save_path = path +"/benchmarking/"+"benchmark_experiments"+controller_name+racetrack+speed+wall_str+".csv";
 
     ROS_WARN("%s",save_path.c_str());
     path = path + "/obstacles/"+filename;
@@ -373,7 +384,7 @@ int main(int argc, char **argv)
 	
     std::ofstream outfile(save_path.c_str() , std::ios::app);
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
-        ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "," << avg_iterations << "\n";
+        ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "," << avg_iterations << "," << num_obstacles << "\n";
     outfile.close();
     
     return 0; 
