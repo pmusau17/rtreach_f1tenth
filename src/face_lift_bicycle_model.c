@@ -340,27 +340,30 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
 		previous_iter = elapsedTotal - elapsed_prev;
+		// its O(2^N) in terms of box checking so have to scale the next iteration by 2 and add 1ms (for over-approximating how long it takes to compute the reachset)
 		if(previous_iter==0)
 			next_iter_estimate = 2;
 		else
-			next_iter_estimate = previous_iter * 2+1;
-		// its O(2^N) in terms of box checking so have to scale the next iteration by 2
-		//previous_iter = ceil(previous_iter * 1.41421356237);
-		elapsed_prev = elapsedTotal;
-		DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d, projected_next_iter: %d\n\r", elapsedTotal,previous_iter,next_iter_estimate);
-
-
+		{
+			if((previous_iter * 2+1)<next_iter_estimate)
+				next_iter_estimate = next_iter_estimate * 2;
+			else
+				next_iter_estimate  = previous_iter * 2+1;
+		}
 		
-
+		elapsed_prev = elapsedTotal;
+		//DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d, projected_next_iter: %d\n\r", elapsedTotal,previous_iter,next_iter_estimate);
 		if (settings->maxRuntimeMilliseconds > 0)
 		{
 			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal;
 
+			if(remaining<0)
+				DEBUG_PRINT("remaining: %d\r\n",remaining);
 			if (remaining <= next_iter_estimate)
 			{
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
-				// DEBUG_PRINT("Quitting from runtime maxed out\n\r");
+				//DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 				rv = lastIterationSafe;
 				//println(&trackedRect);
 				break;
