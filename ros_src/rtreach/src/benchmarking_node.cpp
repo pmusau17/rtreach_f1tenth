@@ -75,7 +75,10 @@ double itq;
 
 int lec_count = 0;
 int safety_count = 0;
+int iteration_count = 0;
 
+// declare logging file
+std::ofstream logfile; 
 
 void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_msg::ConstPtr& velocity_msg, const rtreach::angle_msg::ConstPtr& angle_msg, const ackermann_msgs::AckermannDriveStamped::ConstPtr& safety_msg, const rtreach::stamped_ttc::ConstPtr& ttc_msg)
 {
@@ -162,6 +165,8 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
       wcet = reach_time;
     }
 
+   
+
     // calculate exponential moving average
     count++;
     differential = (reach_time - avg_reach_time) / count;
@@ -208,6 +213,8 @@ void callback(const nav_msgs::Odometry::ConstPtr& msg, const rtreach::velocity_m
     {
       safePeriods = 0;
     }
+    logfile << iteration_count << "," << stop << "," << reach_time << ","<< (double)iterations_at_quit <<  "," << num_obstacles << "\n";
+    iteration_count++;
   }
   
 }
@@ -251,7 +258,7 @@ int main(int argc, char **argv)
 
     // get the path to the file containing the wall points 
     std::string path = ros::package::getPath("rtreach");
-    std::string controller_name, racetrack, speed, wall_str;
+    std::string controller_name, racetrack, speed, wall_str,experiment_number;
     std::string save_path; 
     bool regular_name = false;
     
@@ -301,7 +308,21 @@ int main(int argc, char **argv)
       walltime = atoi(argv[5]);
       wall_str="_"+(std::string)argv[5];
     }
-   
+    if(argc < 6 || argv[6]==NULL)
+    {
+        experiment_number = "";
+    }
+    else
+    {
+        experiment_number = (std::string)argv[6];
+    }
+
+
+
+    std::string log_file = path + "/logs/"+"benchmark_experiments"+controller_name+racetrack+speed+wall_str+"_"+experiment_number+".csv";
+
+    logfile.open(log_file.c_str() , std::ios::app);
+
     std::string filename = argv[1];
     if(regular_name)
       save_path = path +"/benchmarking/"+"benchmark_experiments.csv";
@@ -319,7 +340,7 @@ int main(int argc, char **argv)
     // initialize the ros node
     ros::init(argc, argv, "reachnode_sync");
     std::cout << "sleeping" << std::endl;
-    sleep(10);
+    sleep(5);
     std::cout << "done sleeping" << std:: endl;
     ros::NodeHandle n;
     // ackermann publisher 
@@ -386,6 +407,7 @@ int main(int argc, char **argv)
     outfile << time_string << "," << time_taken_lec << "," << time_taken_safety_controller << 
         ","<< total_time_taken << "," << wcet << "," << avg_reach_time << "," << avg_iterations << "," << num_obstacles << "\n";
     outfile.close();
+    logfile.close();
     
     return 0; 
 }
