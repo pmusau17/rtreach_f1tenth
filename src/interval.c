@@ -93,7 +93,7 @@ Interval pow_interval(Interval i, int n) // a^n
         if (a >= 0)
         {
             c = pow(a, n);
-            d = pow(a, n);
+            d = pow(b, n);
         }
         else if (b < 0)
         {
