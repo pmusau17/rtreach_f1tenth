@@ -25,7 +25,7 @@ cp run_batch_rl.sh run_batch.sh reproduce_emsoft_experiments.sh run_emsoft_exper
 
 # copy all the neccessary header files and library files into the rospackage
 cp src/libRtreachDynamicvis.so  src/libRtreachdyn.so  src/libRtreachObs.so  src/libRtreach.so  src/libRtreachvis.so src/bicycle_dynamic_safety.h  src/bicycle_model_parametrizeable.h  src/bicycle_safety.h  src/dynamics_bicycle.h  src/dynamics_obstacle.h  src/geometry.h  src/main.h src/face_lift.h src/simulate_bicycle_plots.h  src/simulate_obstacle.h ../rtreach_ros/src/rtreach/src/
-
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(pwd)/src
 pushd ../rtreach_ros
 colcon build
 popd
