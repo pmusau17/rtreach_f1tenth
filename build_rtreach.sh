@@ -3,8 +3,8 @@
 pushd src
 
 # Compile the source files needed  to create the C shared library files
-gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c bicycle_dynamic_safety.c bicycle_model_dynamic_vis.c -lm
-gcc -c -std=gnu99 -Wall -fpic face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c -lm 
+gcc -c -std=gnu99 -O3  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c bicycle_dynamic_safety.c bicycle_model_dynamic_vis.c -lm
+gcc -c -std=gnu99 -fpic face_lift_parametrizeable.c geometry.c interval.c util.c simulate_bicycle.c dynamics_bicycle_model.c bicycle_model_parametrizeable.c -lm 
 
 # There are five shared library files we need
 gcc -shared -o libRtreachdyn.so face_lift_parametrizeable.o dynamics_bicycle_model.o geometry.o interval.o util.o simulate_bicycle.o bicycle_model_parametrizeable.o
@@ -27,5 +27,5 @@ cp run_batch_rl.sh run_batch.sh reproduce_emsoft_experiments.sh run_emsoft_exper
 cp src/libRtreachDynamicvis.so  src/libRtreachdyn.so  src/libRtreachObs.so  src/libRtreach.so  src/libRtreachvis.so src/bicycle_dynamic_safety.h  src/bicycle_model_parametrizeable.h  src/bicycle_safety.h  src/dynamics_bicycle.h  src/dynamics_obstacle.h  src/geometry.h  src/main.h src/face_lift.h src/simulate_bicycle_plots.h  src/simulate_obstacle.h ../rtreach_ros/src/rtreach/src/
 
 pushd ../rtreach_ros
-catkin_make
+colcon build
 popd

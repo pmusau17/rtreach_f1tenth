@@ -114,11 +114,14 @@ bool check_safety(HyperRectangle* rect, REAL (*cone)[2])
 	REAL l2[2] = {cone[0][0],cone[1][1]};
     REAL r2[2] = {cone[0][1],cone[1][0]};
 
-	if (l1[0] >= r2[0] || l2[0] >= r1[0]) 
+	if (l1[0] >= r2[0] || l2[0] >= r1[0])
+	{
         return true; 
-    
-    if (l1[1] <= r2[1] || l2[1] <= r1[1]) 
-        return true; 
+	}
+    if (l1[1] <= r2[1] || l2[1] <= r1[1])
+	{
+        return true;
+	}
 
 	return false;
 }
