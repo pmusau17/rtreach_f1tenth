@@ -1,6 +1,5 @@
 # F1Tenth Rtreach
 
-
 # Table of Contents
 
 1. [Introduction](#introduction)
@@ -9,6 +8,8 @@
 4. [Repositiory Organization](#CodeDescrip)
 
 ### Real Time Reachability for the F1Tenth Platform  <a name="introduction"></a>
+
+**Note:** A working port of this repo to ROS-noetic exists on the branch (noetic-port). I'm working on refactoring it so that it leverages built in cmake concepts but it works as is for now. 
 
 This repo is an implementation of a runtime assurance approach by [Stanley Bak et al.](https://ieeexplore.ieee.org/document/7010482) for the F1Tenth platform. The motivation for runtime assurance stems from the ever-increasing complexity of software needed to control autonomous systems, and the need for these systems to be certified for safety and correctness. Thus the methods contained herein are used to build monitors for the system that can be used to ensure that the system remains within a safe operating mode. As an example, in the following animations we display a system with an unsafe neural network inspired controller that occasionally causes the f1tenth model to crash into walls. In the second animation, we add a real time safety monitor that switches to a safe controller when it detects a potential collision. Though the safety controller sacrifices performance it ensures that we do not collide with obstacles. The safety monitor was designed using the algorithms described by Bak et al. 
 
