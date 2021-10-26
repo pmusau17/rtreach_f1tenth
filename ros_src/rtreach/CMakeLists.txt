@@ -81,6 +81,11 @@ add_dependencies(visualize_obs rtreach_generate_messages_cpp)
 set_target_properties(visualize_obs PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
 target_link_libraries(visualize_obs ${catkin_LIBRARIES} ${CUSTOMLIB4})
 
+add_executable(visualize_obs_particles src/visualize_obstacle_particles.cpp)
+add_dependencies(visualize_obs_particles rtreach_generate_messages_cpp)
+set_target_properties(visualize_obs_particles PROPERTIES COMPILE_FLAGS "-DOBSTACLE_MODEL")
+target_link_libraries(visualize_obs_particles ${catkin_LIBRARIES} ${CUSTOMLIB4})
+
 
 add_executable(vis_node_param src/vis_dynamic_param.cpp)
 add_dependencies(vis_node_param rtreach_generate_messages_cpp)
@@ -118,6 +123,7 @@ install(TARGETS
   benchmark_node_dyn
   benchmark_hardware_node
   visualize_hardware
+  visualize_obs_particles
   DESTINATION lib/${PROJECT_NAME}
 )
 

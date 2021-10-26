@@ -12,6 +12,8 @@
 #include <ros/console.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
+#include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/Pose.h>
 #include <math.h>
 #include <cstdlib>
 
@@ -29,8 +31,10 @@ extern "C"
 }
 
 ros::Publisher vis_pub;
+ros::Publisher vis_pub2;
 ros::Publisher tube_pub;
 ros::Subscriber sub; // markerArray subscriber
+ros::Subscriber sub2;
  
 // reachability parameters
 double sim_time;
@@ -59,6 +63,69 @@ void box_pose_callback(const nav_msgs::Odometry::ConstPtr& nav_msg)
     msg = nav_msg;
     //ROS_WARN("got nav message");
     count++;
+}
+
+
+void visualize_position_uncertainty(const geometry_msgs::PoseArray::ConstPtr& pose_msg)
+{
+    int num_particles = pose_msg->poses.size();
+    double roll, pitch, yaw;
+    std::vector<geometry_msgs::Pose> poses = pose_msg->poses;
+    double x_min = 1e9;
+    double x_max =-1e9;
+    double y_min = 1e9;
+    double y_max =-1e9;
+    double yaw_min =1e9;
+    double yaw_max =-1e9;
+
+    for (int i = 0; i< num_particles;i++)
+    {
+
+        x_min = std::min(poses.at(i).position.x,x_min);
+        x_max = std::max(poses.at(i).position.x,x_max);
+        y_min = std::min(poses.at(i).position.y,y_min);
+        y_max = std::max(poses.at(i).position.y,y_max);
+
+        // define the quaternion matrix
+        tf::Quaternion q(
+                poses.at(i).orientation.x,
+                poses.at(i).orientation.y,
+                poses.at(i).orientation.z,
+                poses.at(i).orientation.w);
+        tf::Matrix3x3 m(q);
+        // convert to rpy
+        m.getRPY(roll, pitch, yaw);
+
+        yaw_min = std::min(yaw_min,yaw);
+        yaw_max = std::max(yaw_max,yaw);
+    }
+
+    visualization_msgs::MarkerArray ma;
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time::now();
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::CUBE;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = (x_min+x_max)/2.0;
+    marker.pose.position.y = (y_min+y_max)/2.0;
+    marker.pose.position.z = 0.3;
+    marker.pose.orientation.x = 0;
+    marker.pose.orientation.y = 0;
+    marker.pose.orientation.z = 0;
+    marker.pose.orientation.w = 1;
+    marker.scale.x = x_max-x_min;
+    marker.scale.y = y_max-y_min;
+    marker.scale.z = 0.05;
+    marker.color.a = 1.0; 
+    marker.color.r = 153.0/255.0;
+    marker.color.g = 51.0/255.0;
+    marker.color.b = 1.0;
+    marker.lifetime =ros::Duration(0.1); 
+    ma.markers.push_back(marker);
+    // publish marker
+    vis_pub2.publish(ma);
+
 }
 
 void timer_callback(const ros::TimerEvent& event)
@@ -97,7 +164,6 @@ void timer_callback(const ros::TimerEvent& event)
             msg->pose.pose.orientation.z,
             msg->pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
-
     // convert to rpy
     m.getRPY(roll, pitch, yaw);
 
@@ -235,10 +301,12 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     
     vis_pub = n.advertise<visualization_msgs::MarkerArray>(obs_name+"/reach_hull_obs", 100 );
+    vis_pub2 = n.advertise<visualization_msgs::MarkerArray>(obs_name+"/uncertainty_estimation", 100 );
     tube_pub = n.advertise<rtreach::reach_tube>(obs_name+"/reach_tube",100);
     
   
     sub = n.subscribe(obs_name+"/odom", 1000, box_pose_callback);
+    sub2 = n.subscribe("/pf/viz/particles", 1000, visualize_position_uncertainty);
     ros::Timer timer = n.createTimer(ros::Duration(0.01), timer_callback);
 
     ros::Rate r(80);
