@@ -26,6 +26,7 @@ extern "C"
 { 
     #include "simulate_obstacle.h"
     HyperRectangle runReachability_obstacle_vis(double* start, double simTime, double wallTimeMs, double startMs,double v_x, double v_y, HyperRectangle VisStates[],int  *total_intermediate,int max_intermediate,bool plot);
+    HyperRectangle runReachability_obstacle_vis_uncertain(REAL start[][2], REAL simTime, REAL wallTimeMs, REAL startMs,REAL v_x, REAL v_y, HyperRectangle VisStates[],int  *total_intermediate,int max_intermediate,bool plot);
     double getSimulatedSafeTime(double start[2],double v_x, double v_y);
     HyperRectangle hr_list[max_hyper_rectangles];
 }
@@ -47,6 +48,8 @@ int count = 0;
 
 // initial state for estimate of vehicle position 
 double startState[2] = {0.0, 0.0};
+double startStateU[2][2] = { {0.0, 0.0}, {0.0, 0.0}};
+// double starty[2]
 
 // parameters for visualizing the obstacle reachsets
 double display_max;
@@ -152,10 +155,16 @@ void timer_callback(const ros::TimerEvent& event)
     // assign positions to array
     startState[0] = x;
     startState[1] = y;
+
+    startStateU[0][0] = x-0.2;
+    startStateU[0][1] = x+0.2;
+    startStateU[1][0] = y-0.2;
+    startStateU[1][1] = y+0.2;
     
     // compute the reachable set
-    HyperRectangle reach_hull = runReachability_obstacle_vis(startState, sim_time, walltime, 0,vx,vy,hr_list,&rect_count,max_hyper_rectangles,true);
+    // HyperRectangle reach_hull = runReachability_obstacle_vis(startState, sim_time, walltime, 0,vx,vy,hr_list,&rect_count,max_hyper_rectangles,true);
 
+    HyperRectangle reach_hull = runReachability_obstacle_vis_uncertain(startStateU,sim_time, walltime, 0,vx,vy,hr_list,&rect_count,max_hyper_rectangles,true);
 
     // define the quaternion matrix
     tf::Quaternion q(

@@ -182,3 +182,31 @@ HyperRectangle runReachability_obstacle_vis(REAL* start, REAL simTime, REAL wall
 	return face_lifting_iterative_improvement_obstacle_vis(startMs, &set,v_x, v_y,VisStates, total_intermediate,max_intermediate,plot);
 }
 
+HyperRectangle runReachability_obstacle_vis_uncertain(REAL start[][2], REAL simTime, REAL wallTimeMs, REAL startMs,REAL v_x, REAL v_y, HyperRectangle VisStates[],int  *total_intermediate,int max_intermediate,bool plot)
+{
+	LiftingSettings set;
+	for (int d = 0; d < NUM_DIMS; ++d)
+	{
+		set.init.dims[d].min = start[d][0];
+		set.init.dims[d].max = start[d][1];
+	}
+
+	set.reachTime = simTime;
+	set.maxRuntimeMilliseconds = wallTimeMs;
+
+	REAL iss = set.reachTime;
+	iss = iss * 0.10f;
+
+	set.initialStepSize = iss; //set.reachTime / 10.0f;
+	set.maxRectWidthBeforeError = 100;
+
+	set.reachedAtFinalTime = finalState;
+	set.reachedAtIntermediateTime = intermediateState;
+	set.restartedComputation = restartedComputation; 
+
+    // open_files(true);
+	// hyperrectangle_to_file(f_initial, &set.init, 0);
+
+	return face_lifting_iterative_improvement_obstacle_vis(startMs, &set,v_x, v_y,VisStates, total_intermediate,max_intermediate,plot);
+
+}
