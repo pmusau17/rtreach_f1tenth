@@ -110,7 +110,7 @@ void timer_callback(const ros::TimerEvent& event)
 
     // publish some of the markers,
     // don't freeze gazebo
-    for(int i= 0; i<std::min(max_hyper_rectangles,rect_count-1); i+=display_count)
+    for(int i= 0; i<std::min(max_hyper_rectangles,rect_count); i+=display_count)
     {
         
         hull = hr_list[i];
@@ -138,9 +138,18 @@ void timer_callback(const ros::TimerEvent& event)
         marker.scale.y = (hull.dims[1].max-hull.dims[1].min);
         marker.scale.z = 0.05;
         marker.color.a = 1.0; 
-        marker.color.r = 0.0;
-        marker.color.g = 239.0/255.0;
-        marker.color.b = 1.0;
+        if(i==rect_count-1)
+        {
+            marker.color.r = 1.0;
+            marker.color.g = 0.0;
+            marker.color.b = 0.0;
+        }
+        else
+        {
+            marker.color.r = 0.0;
+            marker.color.g = 239.0/255.0;
+            marker.color.b = 1.0;
+        }
         marker.lifetime =ros::Duration(0.1); 
         ma.markers.push_back(marker);
     }
@@ -148,7 +157,7 @@ void timer_callback(const ros::TimerEvent& event)
     // publish marker
     vis_pub.publish(ma);
     // publish all the rectangles we have or the max we can
-    for(int i= 0; i<std::min(max_hyper_rectangles,rect_count-1); i++)
+    for(int i= 0; i<std::min(max_hyper_rectangles,rect_count); i++)
     {
        hull = hr_list[i];
        if(bloat_reachset)
@@ -171,9 +180,6 @@ void timer_callback(const ros::TimerEvent& event)
     tube_pub.publish(reach_set);
   }
   
-  
-
-
   else
   {
       // visualization_msgs::MarkerArray ma;
